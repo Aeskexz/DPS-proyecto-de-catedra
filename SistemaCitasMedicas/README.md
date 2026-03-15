@@ -1,50 +1,50 @@
-# 🏥 Sistema de Citas Médicas
+#  Sistema de Citas Médicas
 
 Aplicación móvil cross-platform (React Native / Expo) con backend Node.js + Express + MySQL para gestionar citas médicas con roles de **administrador**, **médico** y **cliente (paciente)**.
 
 ---
 
-## 📁 Estructura del Proyecto
+##  Estructura del Proyecto
 
 ```
 SistemaCitasMedicas/
-├── App.js                        # Punto de entrada React Native
-├── src/
-│   ├── context/
-│   │   └── AuthContext.js        # Estado global de sesión (JWT + AsyncStorage)
-│   ├── navigation/
-│   │   └── AppNavigator.js       # Navegación condicional por rol
-│   ├── services/
-│   │   └── api.js                # Cliente Axios + servicios por entidad
-│   └── screens/
-│       ├── auth/
-│       │   ├── LoginScreen.js
-│       │   └── RegisterScreen.js
-│       ├── cliente/
-│       │   ├── ClienteDashboard.js
-│       │   └── NuevaCitaScreen.js
-│       ├── medico/
-│       │   ├── MedicoDashboard.js
-│       │   └── DetalleCitaMedico.js
-│       └── admin/
-│           ├── AdminDashboard.js
-│           ├── GestionMedicos.js
-│           └── RegistrarMedico.js
-└── backend/
-    ├── server.js                 # Servidor Express principal
-    ├── config/db.js              # Pool de conexiones MySQL
-    ├── middleware/auth.js        # JWT + control de roles
-    ├── routes/
-    │   ├── auth.js               # Login y registro
-    │   ├── citas.js              # CRUD de citas
-    │   ├── medicos.js            # Gestión de médicos
-    │   └── especialidades.js     # Catálogo de especialidades
-    └── .env.example              # Plantilla de variables de entorno
+ App.js                        # Punto de entrada React Native
+ src/
+    context/
+       AuthContext.js        # Estado global de sesión (JWT + AsyncStorage)
+    navigation/
+       AppNavigator.js       # Navegación condicional por rol
+    services/
+       api.js                # Cliente Axios + servicios por entidad
+    screens/
+        auth/
+           LoginScreen.js
+           RegisterScreen.js
+        cliente/
+           ClienteDashboard.js
+           NuevaCitaScreen.js
+        medico/
+           MedicoDashboard.js
+           DetalleCitaMedico.js
+        admin/
+            AdminDashboard.js
+            GestionMedicos.js
+            RegistrarMedico.js
+ backend/
+     server.js                 # Servidor Express principal
+     config/db.js              # Pool de conexiones MySQL
+     middleware/auth.js        # JWT + control de roles
+     routes/
+        auth.js               # Login y registro
+        citas.js              # CRUD de citas
+        medicos.js            # Gestión de médicos
+        especialidades.js     # Catálogo de especialidades
+     .env.example              # Plantilla de variables de entorno
 ```
 
 ---
 
-## 🚀 Cómo Arrancar el Proyecto
+##  Cómo Arrancar el Proyecto
 
 ### 1. Base de Datos
 Importa el script SQL en PhpMyAdmin (archivo `database.sql` en la raíz del repo).
@@ -66,13 +66,13 @@ npm start
 # o presiona 'w' para abrir en navegador
 ```
 
-> ⚠️ **Si pruebas en dispositivo físico**, cambia `localhost` por la IP de tu PC en `src/services/api.js`.
+>  **Si pruebas en dispositivo físico**, cambia `localhost` por la IP de tu PC en `src/services/api.js`.
 
 ---
 
-## 👥 Distribución de Tareas del Equipo
+##  Distribución de Tareas del Equipo
 
-### ✅ Ya implementado (Rafael)
+###  Ya implementado (Rafael)
 - Estructura completa del proyecto y backend funcional
 - Autenticación JWT con bcrypt
 - Control de roles (admin / médico / cliente)
@@ -81,9 +81,9 @@ npm start
 
 ---
 
-### 📋 Tareas Pendientes para Compañeros
+###  Tareas Pendientes para Compañeros
 
-#### 🧑‍💻 Compañero A — Mejoras de UI/UX
+####  Compañero A — Mejoras de UI/UX
 | Archivo | Tarea |
 |---|---|
 | `LoginScreen.js` | Agregar logo de la clínica, mejorar paleta de colores corporativa |
@@ -92,7 +92,7 @@ npm start
 | `RegistrarMedico.js` | Convertir campo de especialidad en `Picker` (dropdown) |
 | Todas las pantallas | Implementar modo oscuro / temas con `StyleSheet` global |
 
-#### 🧑‍💻 Compañero B — Funcionalidades de Cliente
+####  Compañero B — Funcionalidades de Cliente
 | Archivo | Tarea |
 |---|---|
 | `ClienteDashboard.js` | Agregar botón "Cancelar Cita" llamando a `PUT /api/citas/:id/estado` |
@@ -100,7 +100,7 @@ npm start
 | `NuevaCitaScreen.js` | Mostrar solo los horarios disponibles del médico seleccionado (requiere endpoint `GET /api/medicos/:id/slots?fecha=`) |
 | `backend/routes/medicos.js` | Implementar `GET /api/medicos/:id/slots` para calcular horas libres |
 
-#### 🧑‍💻 Compañero C — Panel del Médico y Admin
+####  Compañero C — Panel del Médico y Admin
 | Archivo | Tarea |
 |---|---|
 | `MedicoDashboard.js` | Agregar filtro por fecha (hoy / semana) y contador de citas por estado |
@@ -113,7 +113,7 @@ npm start
 
 ---
 
-## 🔐 Roles y Contraseñas por Defecto
+##  Roles y Contraseñas por Defecto
 
 | Rol | Descripción |
 |---|---|
@@ -125,7 +125,7 @@ npm start
 
 ---
 
-## 🔗 Endpoints del API
+##  Endpoints del API
 
 | Método | Ruta | Rol | Descripción |
 |---|---|---|---|
@@ -143,31 +143,31 @@ npm start
 
 ---
 
-## 📜 Licencia
+##  Licencia
 
 Este proyecto está bajo la licencia **Creative Commons Attribution-ShareAlike 4.0 International (CC-BY-SA 4.0)**.
 
 [![CC BY-SA 4.0](https://licensebuttons.net/l/by-sa/4.0/88x31.png)](https://creativecommons.org/licenses/by-sa/4.0/)
 
-### Permisos permitidos ✅
-- ✅ **Uso Comercial** - Úsalo con fines lucrativos
-- ✅ **Modificación** - Adapta y mejora el código
-- ✅ **Distribución** - Comparte el código original o modificado
+### Permisos permitidos 
+-  **Uso Comercial** - Úsalo con fines lucrativos
+-  **Modificación** - Adapta y mejora el código
+-  **Distribución** - Comparte el código original o modificado
 
-### Condiciones requeridas ⚠️
-- 🔗 **Atribución (BY)** - Debes citar la autoría original
-- 🔄 **CompartirIgual (SA)** - Distribuye derivados bajo la misma licencia CC-BY-SA 4.0
+### Condiciones requeridas 
+-  **Atribución (BY)** - Debes citar la autoría original
+-  **CompartirIgual (SA)** - Distribuye derivados bajo la misma licencia CC-BY-SA 4.0
 
-📄 Documentación completa:
+ Documentación completa:
 - [LICENSE](LICENSE) - Texto legal en inglés
 - [LICENSE.es](LICENSE.es) - Texto legal en español
 - [LICENCIAS.md](LICENCIAS.md) - Guía de implementación de CC
 
 ---
 
-## 📌 Gestión del Proyecto (Scrum/Kanban)
+##  Gestión del Proyecto (Scrum/Kanban)
 
-> 🔗 **[Tablero de Notion/Trello]** — *(Agrega aquí el enlace público al tablero)*
+>  **[Tablero de Notion/Trello]** — *(Agrega aquí el enlace público al tablero)*
 
 - **Product Owner:** [nombre]
 - **Scrum Master:** [nombre]

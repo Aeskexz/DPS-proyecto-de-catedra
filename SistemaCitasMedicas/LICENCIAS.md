@@ -1,4 +1,4 @@
-# 📜 Licencias del Proyecto
+#  Licencias del Proyecto
 
 ## Creative Commons Attribution-ShareAlike 4.0 International (CC-BY-SA 4.0)
 
@@ -8,10 +8,10 @@ Este proyecto está licenciado bajo la **Licencia Creative Commons Atribución-C
 
 **CC-BY-SA 4.0** es una licencia que permite:
 
-✅ **Uso Comercial** - Puedes usar el material con fines comerciales  
-✅ **Modificación** - Puedes modificar, adaptar y mejorar el material  
-✅ **Distribución** - Puedes distribucjir el material original o modificado  
-✅ **Uso Privado** - Puedes usar el material para uso privado  
+ **Uso Comercial** - Puedes usar el material con fines comerciales  
+ **Modificación** - Puedes modificar, adaptar y mejorar el material  
+ **Distribución** - Puedes distribucjir el material original o modificado  
+ **Uso Privado** - Puedes usar el material para uso privado  
 
 ### Requisitos
 
@@ -28,7 +28,7 @@ Cuando uses, modifiques o distribuyas este proyecto, **DEBES**:
 
 ### Prohibiciones
 
-❌ Los siguientes usos **NO están permitidos** sin permiso:
+ Los siguientes usos **NO están permitidos** sin permiso:
 - Reivindicar que patentes, marcas registradas, o derechos de autor son tuyos
 - Usar medidas tecnológicas para restringir el acceso al material
 - Violar derechos de privacidad o difamación
@@ -55,7 +55,7 @@ disponible en [URL del repositorio original]
 
 ---
 
-## 📚 Más Información sobre Creative Commons
+##  Más Información sobre Creative Commons
 
 ### ¿Qué es Creative Commons?
 
@@ -84,14 +84,14 @@ Se eligió **CC-BY-SA 4.0** para este proyecto porque:
 
 ### Enlaces Útiles
 
-- 🌐 **Sitio oficial**: https://creativecommons.org
-- 📖 **Licencia CC-BY-SA 4.0**: https://creativecommons.org/licenses/by-sa/4.0
-- 🔗 **En español**: https://creativecommons.org/licenses/by-sa/4.0/es/
-- 📝 **Preguntas frecuentes**: https://creativecommons.org/faq/
+-  **Sitio oficial**: https://creativecommons.org
+-  **Licencia CC-BY-SA 4.0**: https://creativecommons.org/licenses/by-sa/4.0
+-  **En español**: https://creativecommons.org/licenses/by-sa/4.0/es/
+-  **Preguntas frecuentes**: https://creativecommons.org/faq/
 
 ---
 
-## ⚖️ Cómo Implementar CC-BY-SA 4.0 en tu Proyecto
+##  Cómo Implementar CC-BY-SA 4.0 en tu Proyecto
 
 ### 1. Agregar Aviso en tu Código
 
@@ -108,21 +108,21 @@ Al inicio de los archivos de código, puedes agregar:
 ### 2. Agregar Aviso en tu README
 
 ```markdown
-## 📜 Licencia
+##  Licencia
 
 Este proyecto está bajo la licencia **Creative Commons Atribución-CompartirIgual 4.0 Internacional**
 
-- 📄 [LICENSE](LICENSE) - Texto completo en inglés
-- 📄 [LICENSE.es](LICENSE.es) - Texto completo en español
+-  [LICENSE](LICENSE) - Texto completo en inglés
+-  [LICENSE.es](LICENSE.es) - Texto completo en español
 
 Bajo esta licencia puedes:
-- ✅ Usar comercialmente
-- ✅ Modificar
-- ✅ Distribuir
+-  Usar comercialmente
+-  Modificar
+-  Distribuir
 
 Con la condición de:
-- 🔗 Mantener atribución
-- 🔄 Compartir derivados bajo CC-BY-SA 4.0
+-  Mantener atribución
+-  Compartir derivados bajo CC-BY-SA 4.0
 
 Más información: https://creativecommons.org/licenses/by-sa/4.0/
 ```
@@ -149,7 +149,7 @@ Más información: https://creativecommons.org/licenses/by-sa/4.0/
 
 ---
 
-## 🤝 Contribuciones
+##  Contribuciones
 
 Si deseas contribuir a este proyecto:
 
@@ -160,7 +160,7 @@ Si deseas contribuir a este proyecto:
 
 ---
 
-## 📋 Resumen de Términos Claves
+##  Resumen de Términos Claves
 
 | Término | Significado |
 |---------|-------------|
@@ -173,7 +173,7 @@ Si deseas contribuir a este proyecto:
 
 ---
 
-## ⚠️ Importante
+##  Importante
 
 - Creative Commons **NO es un despacho de abogados**
 - Este es un **resumen** de la licencia, no el sustituto legal completo

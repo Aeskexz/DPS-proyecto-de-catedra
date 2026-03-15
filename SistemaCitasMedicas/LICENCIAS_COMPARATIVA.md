@@ -1,6 +1,6 @@
 # Comparativa de Licencias Creative Commons para Proyectos
 
-## 📊 Resumen General
+##  Resumen General
 
 Las **licencias Creative Commons (CC)** ofrecen cuatro elementos que puedes combinar:
 
@@ -13,13 +13,13 @@ Las **licencias Creative Commons (CC)** ofrecen cuatro elementos que puedes comb
 
 ---
 
-## 🎯 Las 6 Licencias CC Principales
+##  Las 6 Licencias CC Principales
 
 ### 1. **CC BY** — Atribución
 ```
 Simbolo: [BY]
-Permite: ✅ Comercial ✅ Derivados ✅ Compartir
-Requiere: 🔗 Atribución
+Permite:  Comercial  Derivados  Compartir
+Requiere:  Atribución
 ```
 **Uso ideal para:**
 - Fotografías
@@ -31,11 +31,11 @@ Requiere: 🔗 Atribución
 
 ---
 
-### 2. **CC BY-SA** — Atribución-CompartirIgual ⭐ **(ELEGIDA PARA ESTE PROYECTO)**
+### 2. **CC BY-SA** — Atribución-CompartirIgual  **(ELEGIDA PARA ESTE PROYECTO)**
 ```
 Símbolo: [BY-SA]
-Permite: ✅ Comercial ✅ Derivados ✅ Compartir
-Requiere: 🔗 Atribución + 🔄 CompartirIgual
+Permite:  Comercial  Derivados  Compartir
+Requiere:  Atribución +  CompartirIgual
 ```
 **Uso ideal para:**
 - **Proyectos de software abierto**
@@ -45,10 +45,10 @@ Requiere: 🔗 Atribución + 🔄 CompartirIgual
 - Proyectos educativos
 
 **Ventajas:**
-- ✅ Promueve contribuciones comunitarias
-- ✅ Las mejoras vuelven al proyecto
-- ✅ Legal y clara
-- ✅ Ideal para equipos
+-  Promueve contribuciones comunitarias
+-  Las mejoras vuelven al proyecto
+-  Legal y clara
+-  Ideal para equipos
 
 **Casos reales:**
 - WordPress (CC BY-SA 4.0)
@@ -60,8 +60,8 @@ Requiere: 🔗 Atribución + 🔄 CompartirIgual
 ### 3. **CC BY-NC** — Atribución-NoComercial
 ```
 Símbolo: [BY-NC]
-Permite: ✅ Derivados ✅ Compartir
-Requiere: 🔗 Atribución | ❌ Sin uso comercial
+Permite:  Derivados  Compartir
+Requiere:  Atribución |  Sin uso comercial
 ```
 **Uso ideal para:**
 - Contenido personal/blog
@@ -76,8 +76,8 @@ Requiere: 🔗 Atribución | ❌ Sin uso comercial
 ### 4. **CC BY-NC-SA** — Atribución-NoComercial-CompartirIgual
 ```
 Símbolo: [BY-NC-SA]
-Permite: ✅ Derivados ✅ Compartir
-Requiere: 🔗 Atribución | 🔄 CompartirIgual | ❌ Sin comercial
+Permite:  Derivados  Compartir
+Requiere:  Atribución |  CompartirIgual |  Sin comercial
 ```
 **Uso ideal para:**
 - Cursos online gratuitos
@@ -92,8 +92,8 @@ Requiere: 🔗 Atribución | 🔄 CompartirIgual | ❌ Sin comercial
 ### 5. **CC BY-ND** — Atribución-SinDerivados
 ```
 Símbolo: [BY-ND]
-Permite: ✅ Comercial ✅ Compartir
-Requiere: 🔗 Atribución | ❌ Sin modificaciones
+Permite:  Comercial  Compartir
+Requiere:  Atribución |  Sin modificaciones
 ```
 **Uso ideal para:**
 - Contenido finalizado (ebooks, PDFs)
@@ -107,8 +107,8 @@ Requiere: 🔗 Atribución | ❌ Sin modificaciones
 ### 6. **CC BY-NC-ND** — Atribución-NoComercial-SinDerivados
 ```
 Símbolo: [BY-NC-ND]
-Permite: ✅ Compartir
-Requiere: 🔗 Atribución | ❌ Sin comercial | ❌ Sin derivados
+Permite:  Compartir
+Requiere:  Atribución |  Sin comercial |  Sin derivados
 ```
 **Uso ideal para:**
 - Contenido muy específico
@@ -119,7 +119,7 @@ Requiere: 🔗 Atribución | ❌ Sin comercial | ❌ Sin derivados
 
 ---
 
-## 🔍 Comparativa para Diferentes Proyectos
+##  Comparativa para Diferentes Proyectos
 
 ### Proyecto A: Software/Código Abierto
 ```
@@ -160,29 +160,29 @@ RAZÓN:
 
 ---
 
-## ✅ ¿POR QUÉ CC-BY-SA 4.0 PARA ESTE PROYECTO?
+##  ¿POR QUÉ CC-BY-SA 4.0 PARA ESTE PROYECTO?
 
 ```
-✅ 1. PROPÓSITO EDUCATIVO
+ 1. PROPÓSITO EDUCATIVO
      - Sistema de Citas Médicas es proyecto de aprendizaje
      - Beneficia a estudiantes de desarrollo
 
-✅ 2. COLABORACIÓN
+ 2. COLABORACIÓN
      - Permite que compañeros mejoren el código
      - Fomenta contribuciones
      - Comunidad abierta
 
-✅ 3. SOSTENIBILIDAD
+ 3. SOSTENIBILIDAD
      - Las mejoras vuelven al proyecto base
      - Evita fragmentación en forks privatizados
      - Asegura que el conocimiento sea compartido
 
-✅ 4. TRANSPARENCIA
+ 4. TRANSPARENCIA
      - Todos saben qué pueden hacer
      - Sin sorpresas legales
      - Términos claros y justos
 
-✅ 5. USO COMERCIAL PERMITIDO
+ 5. USO COMERCIAL PERMITIDO
      - Si quieres monetizar, ¡adelante!
      - Solo requiere atribución
      - Ideal si el proyecto crece
@@ -190,24 +190,24 @@ RAZÓN:
 
 ---
 
-## 🔄 Flujo de Decisión
+##  Flujo de Decisión
 
 ```
          ¿Código/Software?
               |
-        ┌─────┼─────┐
+        
         |           |
        SI          NO
         |           |
         |      ¿Fotografía/Arte?
         |      |
-        |      +─→ CC-BY-NC
+        |      +→ CC-BY-NC
         |
     ¿Quieres evitar
     explotación
     comercial?
         |
-    ┌───┼───┐
+    
    SI   NO
     |    |
    CC   CC-BY-SA ← NUESTRO CASO
@@ -216,22 +216,22 @@ RAZÓN:
 
 ---
 
-## 📋 Checklist: Implementar CC-BY-SA 4.0
+##  Checklist: Implementar CC-BY-SA 4.0
 
-- [ ] ✅ Archivo `LICENSE` con texto completo
-- [ ] ✅ Archivo `LICENSE.es` en español
-- [ ] ✅ `package.json` con campo `"license": "CC-BY-SA-4.0"`
-- [ ] ✅ `README.md` con sección de licencia
-- [ ] ✅ `LICENCIAS.md` con explicación
-- [ ] ✅ `PLANTILLAS_LICENCIA.md` con ejemplos
-- [ ] ✅ Este archivo: `LICENCIAS_COMPARATIVA.md`
+- [ ]  Archivo `LICENSE` con texto completo
+- [ ]  Archivo `LICENSE.es` en español
+- [ ]  `package.json` con campo `"license": "CC-BY-SA-4.0"`
+- [ ]  `README.md` con sección de licencia
+- [ ]  `LICENCIAS.md` con explicación
+- [ ]  `PLANTILLAS_LICENCIA.md` con ejemplos
+- [ ]  Este archivo: `LICENCIAS_COMPARATIVA.md`
 - [ ] ⏳ Agregar headers en archivos principales
 - [ ] ⏳ Crear NOTICE.md con lista de autores
 - [ ] ⏳ Configurar CI/CD para verificar licencia
 
 ---
 
-## 🌐 Recursos Útiles
+##  Recursos Útiles
 
 ### Sitios Oficiales
 - **Creative Commons**: https://creativecommons.org
@@ -250,7 +250,7 @@ RAZÓN:
 
 ---
 
-## ⚖️ Términos Legales Breves
+##  Términos Legales Breves
 
 | Licencia | English Name | Jurisdicción | URL |
 |----------|---|---|---|
@@ -263,7 +263,7 @@ RAZÓN:
 
 ---
 
-## 🎓 Preguntas Frecuentes
+##  Preguntas Frecuentes
 
 **P: ¿Puedo cambiar la licencia después?**  
 R: Parcialmente. Versiones anteriores permanecen bajo la licencia original. Nuevas versiones pueden tener otra licencia.

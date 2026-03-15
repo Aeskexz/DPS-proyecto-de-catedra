@@ -40,7 +40,7 @@ const CitaCard = ({ cita }) => {
                 </View>
             </View>
             <Text style={styles.cardEspecialidad}>{cita.especialidad}</Text>
-            <Text style={styles.cardFecha}>📅 {cita.fecha_cita}  🕐 {cita.hora_cita?.slice(0, 5)}</Text>
+            <Text style={styles.cardFecha}> {cita.fecha_cita}   {cita.hora_cita?.slice(0, 5)}</Text>
             {cita.motivo_consulta ? <Text style={styles.cardMotivo}>Motivo: {cita.motivo_consulta}</Text> : null}
         </View>
     );
@@ -76,10 +76,10 @@ const ClienteDashboard = ({ navigation }) => {
 
     return (
         <SafeAreaView style={styles.container} edges={['top']}>
-            {/* ── Header ─────────────────────────────────────── */}
+            {/*  Header  */}
             <View style={styles.header}>
                 <View style={[styles.headerInfo, isMobile && styles.headerInfoMobile]}>
-                    <Text style={styles.bienvenida}>Hola, {user.nombre} 👋</Text>
+                    <Text style={styles.bienvenida}>Hola, {user.nombre} </Text>
                     <Text style={styles.subtitulo}>Tus próximas citas</Text>
                 </View>
                 <View style={[styles.headerActions, isMobile && styles.headerActionsMobile]}>
@@ -92,7 +92,7 @@ const ClienteDashboard = ({ navigation }) => {
                 </View>
             </View>
  
-            {/* ── Lista de citas ─────────────────────────────── */}
+            {/*  Lista de citas  */}
             <FlatList
                 data={citas}
                 keyExtractor={(item) => String(item.id_cita)}
@@ -104,7 +104,7 @@ const ClienteDashboard = ({ navigation }) => {
                 contentContainerStyle={{ paddingBottom: 100 }}
             />
 
-            {/* ── FAB: Nueva cita ────────────────────────────── */}
+            {/*  FAB: Nueva cita  */}
             <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate('NuevaCita', { onVolver: cargarCitas })}>
                 <Text style={styles.fabTexto}>+ Nueva Cita</Text>
             </TouchableOpacity>

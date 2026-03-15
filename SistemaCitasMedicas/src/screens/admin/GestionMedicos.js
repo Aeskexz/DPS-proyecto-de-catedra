@@ -75,8 +75,8 @@ const GestionMedicos = ({ navigation, route }) => {
                         <Text style={styles.nombre}>{item.nombre_completo}</Text>
                         <Text style={styles.esp}>{item.especialidad}</Text>
                         <Text style={styles.info}>{item.email}</Text>
-                        {item.telefono ? <Text style={styles.info}>📞 {item.telefono}</Text> : null}
-                        {item.numero_colegiado ? <Text style={styles.info}>🪪 Colegiado: {item.numero_colegiado}</Text> : null}
+                        {item.telefono ? <Text style={styles.info}> {item.telefono}</Text> : null}
+                        {item.numero_colegiado ? <Text style={styles.info}> Colegiado: {item.numero_colegiado}</Text> : null}
                         <TouchableOpacity
                             style={styles.desactivarBtn}
                             onPress={() => desactivar(item.id_medico, item.nombre_completo)}

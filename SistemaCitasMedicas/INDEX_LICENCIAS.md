@@ -1,4 +1,4 @@
-# 📑 Índice de Licencias - Guía de Navegación
+#  Índice de Licencias - Guía de Navegación
 
 Bienvenido a la implementación de **Creative Commons Attribution-ShareAlike 4.0 International (CC-BY-SA 4.0)** en el proyecto Sistema de Citas Médicas.
 
@@ -6,21 +6,21 @@ Este archivo te ayudará a encontrar exactamente lo que necesitas sobre las lice
 
 ---
 
-## 🎯 ¿Qué Necesitas?
+##  ¿Qué Necesitas?
 
-### 👤 Soy Usuario/Público
+###  Soy Usuario/Público
 **Quiero saber qué puedo hacer con el código**
 
 → **Lee:** [LICENCIAS.md](LICENCIAS.md) - Sección "¿Qué significa esto?"
-- ✅ Esto te permite
-- ❌ Esto no está permitido
-- 🔗 Requisitos
+-  Esto te permite
+-  Esto no está permitido
+-  Requisitos
 
 **Tiempo estimado:** 5 minutos
 
 ---
 
-### 👨‍💻 Soy Desarrollador
+###  Soy Desarrollador
 **Quiero entender la licencia y cómo implementarla**
 
 → **Lee en este orden:**
@@ -32,7 +32,7 @@ Este archivo te ayudará a encontrar exactamente lo que necesitas sobre las lice
 
 ---
 
-### 🤔 Estoy Considerando Hacer Fork
+###  Estoy Considerando Hacer Fork
 **Quiero saber cómo mantener la licencia en mi derivado**
 
 → **Lee:**
@@ -44,7 +44,7 @@ Este archivo te ayudará a encontrar exactamente lo que necesitas sobre las lice
 
 ---
 
-### ⚖️ Soy un Abogado/Experto Legal
+###  Soy un Abogado/Experto Legal
 **Quiero revisar los documentos legales**
 
 → **Lee:**
@@ -56,7 +56,7 @@ Este archivo te ayudará a encontrar exactamente lo que necesitas sobre las lice
 
 ---
 
-### 🎓 Soy Educador
+###  Soy Educador
 **Quiero enseñar sobre Creative Commons a mi equipo**
 
 → **Comparte:**
@@ -68,7 +68,7 @@ Este archivo te ayudará a encontrar exactamente lo que necesitas sobre las lice
 
 ---
 
-### 🔍 Soy Auditor
+###  Soy Auditor
 **Necesito verificar el cumplimiento de licencias**
 
 → **Revisa:**
@@ -80,22 +80,22 @@ Este archivo te ayudará a encontrar exactamente lo que necesitas sobre las lice
 
 ---
 
-## 📚 Archivos por Tipo
+##  Archivos por Tipo
 
-### 📄 Documentos Legales
+###  Documentos Legales
 | Archivo | Propósito | Público | Modificable |
 |---------|----------|---------|-----------|
-| [LICENSE](LICENSE) | Texto legal CC-BY-SA 4.0 en inglés | ✅ | ❌ |
-| [LICENSE.es](LICENSE.es) | Texto legal CC-BY-SA 4.0 en español | ✅ | ❌ |
+| [LICENSE](LICENSE) | Texto legal CC-BY-SA 4.0 en inglés |  |  |
+| [LICENSE.es](LICENSE.es) | Texto legal CC-BY-SA 4.0 en español |  |  |
 
-### 📚 Guías Educativas
+###  Guías Educativas
 | Archivo | Nivel | Audiencia | Tiempo |
 |---------|-------|----------|--------|
 | [LICENCIAS.md](LICENCIAS.md) | Básico | Todos | 5-10 min |
 | [LICENCIAS_COMPARATIVA.md](LICENCIAS_COMPARATIVA.md) | Intermedio | Desarrolladores | 15-20 min |
 | [PLANTILLAS_LICENCIA.md](PLANTILLAS_LICENCIA.md) | Técnico | Programadores | 10-15 min |
 
-### 🔧 Operacional
+###  Operacional
 | Archivo | Propósito | Implementación |
 |---------|----------|-----------------|
 | [FLUJO_TRABAJO_LICENCIAS.md](FLUJO_TRABAJO_LICENCIAS.md) | Git workflow | Pre-commit hooks, branches |
@@ -104,162 +104,162 @@ Este archivo te ayudará a encontrar exactamente lo que necesitas sobre las lice
 
 ---
 
-## 🗺️ Mapa Conceptual
+##  Mapa Conceptual
 
 ```
 USUARIO FINAL
     ↓
-    └─→ "¿Qué puedo hacer?" → LICENCIAS.md
+    → "¿Qué puedo hacer?" → LICENCIAS.md
     
 DESARROLLADOR NUEVO
     ↓
-    ├─→ "¿Qué es CC-BY-SA?" → LICENCIAS.md
-    ├─→ "¿Cómo lo implemento?" → PLANTILLAS_LICENCIA.md
-    └─→ "¿Cómo contribuyo?" → FLUJO_TRABAJO_LICENCIAS.md
+    → "¿Qué es CC-BY-SA?" → LICENCIAS.md
+    → "¿Cómo lo implemento?" → PLANTILLAS_LICENCIA.md
+    → "¿Cómo contribuyo?" → FLUJO_TRABAJO_LICENCIAS.md
     
 EQUIPO DE ABOGADOS
     ↓
-    ├─→ "Texto legal completo" → LICENSE / LICENSE.es
-    ├─→ "Autores documentados" → NOTICE.md
-    └─→ "¿Por qué esta licencia?" → LICENCIAS_COMPARATIVA.md
+    → "Texto legal completo" → LICENSE / LICENSE.es
+    → "Autores documentados" → NOTICE.md
+    → "¿Por qué esta licencia?" → LICENCIAS_COMPARATIVA.md
     
 ANALISTA DE AUDITORÍA
     ↓
-    ├─→ "Checklist" → RESUMEN_LICENCIAS.md
-    ├─→ "Dependencias" → NOTICE.md
-    └─→ "Metadata" → package.json
+    → "Checklist" → RESUMEN_LICENCIAS.md
+    → "Dependencias" → NOTICE.md
+    → "Metadata" → package.json
 ```
 
 ---
 
-## 🔍 Búsqueda Rápida
+##  Búsqueda Rápida
 
 ### Si buscas...
 
 **"¿Qué licencia usamos?"**
-→ [LICENCIAS.md](LICENCIAS.md#creative-commons-attribution-sharealike-40-international) ⚡
+→ [LICENCIAS.md](LICENCIAS.md#creative-commons-attribution-sharealike-40-international) 
 
 **"¿Puedo usar el código comercialmente?"**
-→ [LICENCIAS.md](LICENCIAS.md#-qué-significa-esto) ⚡
+→ [LICENCIAS.md](LICENCIAS.md#-qué-significa-esto) 
 
 **"¿Cómo atribuir correctamente?"**
-→ [LICENCIAS.md](LICENCIAS.md#cómo-atribuir-este-proyecto) ⚡
+→ [LICENCIAS.md](LICENCIAS.md#cómo-atribuir-este-proyecto) 
 
 **"¿Cuál es la diferencia entre CC-BY-SA y CC-BY?"**
-→ [LICENCIAS_COMPARATIVA.md](LICENCIAS_COMPARATIVA.md#-resumen-general) ⚡
+→ [LICENCIAS_COMPARATIVA.md](LICENCIAS_COMPARATIVA.md#-resumen-general) 
 
 **"¿Debo cambiar la licencia en mi fork?"**
-→ [FLUJO_TRABAJO_LICENCIAS.md](FLUJO_TRABAJO_LICENCIAS.md#-cosas-a-evitar) ⚡
+→ [FLUJO_TRABAJO_LICENCIAS.md](FLUJO_TRABAJO_LICENCIAS.md#-cosas-a-evitar) 
 
 **"¿Cómo agregar header de licencia a un archivo?"**
-→ [PLANTILLAS_LICENCIA.md](PLANTILLAS_LICENCIA.md#-plantilla-1-archivos-javascriptreact) ⚡
+→ [PLANTILLAS_LICENCIA.md](PLANTILLAS_LICENCIA.md#-plantilla-1-archivos-javascriptreact) 
 
 **"¿Quiénes crearon el proyecto?"**
-→ [NOTICE.md](NOTICE.md#-autores-y-contributores-originales) ⚡
+→ [NOTICE.md](NOTICE.md#-autores-y-contributores-originales) 
 
 **"¿Qué versión de CC-BY-SA se usa?"**
-→ [package.json](package.json) / [README.md](README.md#-licencia) ⚡
+→ [package.json](package.json) / [README.md](README.md#-licencia) 
 
 ---
 
-## 📖 Tabla de Contenidos General
+##  Tabla de Contenidos General
 
-### 1️⃣ LICENCIAS.md
+### 1⃣ LICENCIAS.md
 ```
-├── Creative Commons Attribution-ShareAlike 4.0
-│   ├── ¿Qué significa esto?
-│   ├── Requisitos
-│   ├── Prohibiciones
-│   └── Cómo Atribuir
-├── Más Información sobre Creative Commons
-│   ├── ¿Qué es CC?
-│   ├── Las 6 Licencias
-│   └── ¿Por qué CC-BY-SA 4.0?
-├── Implementación en tu Proyecto
-│   ├── Agregar Aviso en Código
-│   ├── Agregar Aviso en README
-│   ├── Agregar Badge
-│   ├── En package.json
-│   └── Contribuciones
-└── Información Adicional
-```
-
-### 2️⃣ LICENCIAS_COMPARATIVA.md
-```
-├── Resumen General
-│   └── Tabla de elementos (BY, SA, NC, ND)
-├── Las 6 Licencias CC Principales
-│   ├── CC BY
-│   ├── CC BY-SA (NUESTRO CASO)
-│   ├── CC BY-NC
-│   ├── CC BY-NC-SA
-│   ├── CC BY-ND
-│   └── CC BY-NC-ND
-├── Comparativa para Diferentes Proyectos
-├── Flujo de Decisión
-├── Checklist de Implementación
-└── FAQ y Términos Legales
+ Creative Commons Attribution-ShareAlike 4.0
+    ¿Qué significa esto?
+    Requisitos
+    Prohibiciones
+    Cómo Atribuir
+ Más Información sobre Creative Commons
+    ¿Qué es CC?
+    Las 6 Licencias
+    ¿Por qué CC-BY-SA 4.0?
+ Implementación en tu Proyecto
+    Agregar Aviso en Código
+    Agregar Aviso en README
+    Agregar Badge
+    En package.json
+    Contribuciones
+ Información Adicional
 ```
 
-### 3️⃣ PLANTILLAS_LICENCIA.md
+### 2⃣ LICENCIAS_COMPARATIVA.md
 ```
-├── 6 Plantillas de Headers
-│   ├── JavaScript/React
-│   ├── SQL
-│   ├── Node.js/Express
-│   ├── CSS
-│   ├── Configuración
-│   └── Funciones
-├── Patrones a Seguir
-├── Atribución Múltiple (Forks)
-├── Por qué Heredar la Licencia
-└── Herramientas Útiles
-```
-
-### 4️⃣ FLUJO_TRABAJO_LICENCIAS.md
-```
-├── Archivos de Licencia Principales
-├── Checklist: Antes de Push
-├── Proceso de Contribución (7 pasos)
-├── Pre-commit Hooks
-├── Actualizar NOTICE.md
-├── Comando Utiles
-├── Cosas a EVITAR
-├── Cosas que SÍ DEBES HACER
-├── Proteger la Licencia en GitHub
-└── Educación del Equipo
+ Resumen General
+    Tabla de elementos (BY, SA, NC, ND)
+ Las 6 Licencias CC Principales
+    CC BY
+    CC BY-SA (NUESTRO CASO)
+    CC BY-NC
+    CC BY-NC-SA
+    CC BY-ND
+    CC BY-NC-ND
+ Comparativa para Diferentes Proyectos
+ Flujo de Decisión
+ Checklist de Implementación
+ FAQ y Términos Legales
 ```
 
-### 5️⃣ NOTICE.md
+### 3⃣ PLANTILLAS_LICENCIA.md
 ```
-├── Información de Licencia
-├── Autores y Contribuyentes
-├── Dependencias y Sus Licencias
-├── Reconocimientos Especiales
-├── Cómo Atribuir (3 opciones)
-├── Cambios por Versión
-├── Disclaimer Legal
-└── Contacto y Soporte
+ 6 Plantillas de Headers
+    JavaScript/React
+    SQL
+    Node.js/Express
+    CSS
+    Configuración
+    Funciones
+ Patrones a Seguir
+ Atribución Múltiple (Forks)
+ Por qué Heredar la Licencia
+ Herramientas Útiles
 ```
 
-### 6️⃣ RESUMEN_LICENCIAS.md
+### 4⃣ FLUJO_TRABAJO_LICENCIAS.md
 ```
-├── Objetivo Completado
-├── Archivos Creados/Modificados
-├── Estructura de Carpetas
-├── Licencia Elegida: CC-BY-SA 4.0
-├── Contenido de Cada Archivo
-├── Verificación Rápida
-├── Estadísticas del Proyecto
-├── Cumplimiento de Términos
-├── Próximos Pasos
-├── Checklist de Implementación
-└── Impacto Esperado
+ Archivos de Licencia Principales
+ Checklist: Antes de Push
+ Proceso de Contribución (7 pasos)
+ Pre-commit Hooks
+ Actualizar NOTICE.md
+ Comando Utiles
+ Cosas a EVITAR
+ Cosas que SÍ DEBES HACER
+ Proteger la Licencia en GitHub
+ Educación del Equipo
+```
+
+### 5⃣ NOTICE.md
+```
+ Información de Licencia
+ Autores y Contribuyentes
+ Dependencias y Sus Licencias
+ Reconocimientos Especiales
+ Cómo Atribuir (3 opciones)
+ Cambios por Versión
+ Disclaimer Legal
+ Contacto y Soporte
+```
+
+### 6⃣ RESUMEN_LICENCIAS.md
+```
+ Objetivo Completado
+ Archivos Creados/Modificados
+ Estructura de Carpetas
+ Licencia Elegida: CC-BY-SA 4.0
+ Contenido de Cada Archivo
+ Verificación Rápida
+ Estadísticas del Proyecto
+ Cumplimiento de Términos
+ Próximos Pasos
+ Checklist de Implementación
+ Impacto Esperado
 ```
 
 ---
 
-## ⏱️ Guía de Tiempo
+## ⏱ Guía de Tiempo
 
 ### Lectura Rápida (5 min)
 - [LICENCIAS.md](LICENCIAS.md) - Solo "¿Qué significa esto?"
@@ -283,7 +283,7 @@ ANALISTA DE AUDITORÍA
 
 ---
 
-## 🎓 Rutas de Aprendizaje
+##  Rutas de Aprendizaje
 
 ### Ruta 1: Usuario Final (5 min)
 ```
@@ -317,7 +317,7 @@ START → LICENCIAS_COMPARATIVA.md → Discusión → PLANTILLAS_LICENCIA.md →
 
 ---
 
-## 🔗 Enlaces Rápidos
+##  Enlaces Rápidos
 
 ### Dentro del Proyecto
 - [README.md](README.md) - Descripción general del proyecto
@@ -335,7 +335,7 @@ START → LICENCIAS_COMPARATIVA.md → Discusión → PLANTILLAS_LICENCIA.md →
 
 ---
 
-## 📞 Obtener Ayuda
+##  Obtener Ayuda
 
 ### Pregunta Frecuente
 1. Busca en este archivo (Índice)
@@ -351,7 +351,7 @@ START → LICENCIAS_COMPARATIVA.md → Discusión → PLANTILLAS_LICENCIA.md →
 
 ---
 
-## ✅ Checklist de Lectura
+##  Checklist de Lectura
 
 Marca lo que ya leíste:
 
@@ -370,28 +370,28 @@ Marca lo que ya leíste:
 
 ---
 
-## 📊 Matriz de Relevancia
+##  Matriz de Relevancia
 
 Relevancia de cada archivo por tipo de usuario:
 
 ```
                     Usuario | Dev | Contribu | Auditor | Abogado
-────────────────────────────┼─────┼──────────┼─────────┼────────
-LICENCIAS.md                │ 🔴  │ 🔴      │ 🟡    │ 🟡
-LICENCIAS_COMPARATIVA.md    │ 🟢  │ 🔴      │ 🟢    │ 🟡
-PLANTILLAS_LICENCIA.md      │ 🟢  │ 🔴      │ 🟢    │ 🟢
-FLUJO_TRABAJO_LICENCIAS.md  │ 🟢  │ 🔴      │ 🟢    │ 🟡
-NOTICE.md                   │ 🟢  │ 🟡      │ 🔴    │ 🔴
-RESUMEN_LICENCIAS.md        │ 🟢  │ 🟡      │ 🔴    │ 🟡
-LICENSE / LICENSE.es        │ 🟢  │ 🟡      │ 🟢    │ 🔴
-INDEX.md (ESTE)             │ 🔴  │ 🔴      │ 🟡    │ 🟡
 
-Leyenda: 🔴 Crítico | 🟡 Importante | 🟢 Útil | ⚫ Opcional
+LICENCIAS.md                                
+LICENCIAS_COMPARATIVA.md                    
+PLANTILLAS_LICENCIA.md                      
+FLUJO_TRABAJO_LICENCIAS.md                  
+NOTICE.md                                   
+RESUMEN_LICENCIAS.md                        
+LICENSE / LICENSE.es                        
+INDEX.md (ESTE)                             
+
+Leyenda:  Crítico |  Importante |  Útil |  Opcional
 ```
 
 ---
 
-## 🎯 Plan de Acción Rápido
+##  Plan de Acción Rápido
 
 ### Necesito entender TODO AHORA
 1. Copia este URL a un buscador: [LICENCIAS.md](LICENCIAS.md)
@@ -415,4 +415,4 @@ Leyenda: 🔴 Crítico | 🟡 Importante | 🟢 Útil | ⚫ Opcional
 **Última Actualización:** Marzo 2026  
 **Versión:** 1.0
 
-¿Listo para empezar? 👉 [LICENCIAS.md](LICENCIAS.md)
+¿Listo para empezar?  [LICENCIAS.md](LICENCIAS.md)

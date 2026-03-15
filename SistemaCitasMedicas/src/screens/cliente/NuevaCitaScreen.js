@@ -86,7 +86,7 @@ const NuevaCitaScreen = ({ navigation, route }) => {
     return (
         <ScrollView contentContainerStyle={[styles.container, { paddingHorizontal: horizontalPadding }]}> 
             <View style={[styles.wrapper, { maxWidth: contentMaxWidth }]}> 
-            {/* ── Header ─────────────────────────────────── */}
+            {/*  Header  */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                     <Text style={styles.back}>← Volver</Text>
@@ -94,7 +94,7 @@ const NuevaCitaScreen = ({ navigation, route }) => {
                 <Text style={styles.titulo}>Nueva Cita</Text>
             </View>
 
-            {/* ── Selección de Médico ──────────────────── */}
+            {/*  Selección de Médico  */}
             <Text style={styles.seccionTitulo}>Selecciona un médico</Text>
             {medicos.map((m) => (
                 <TouchableOpacity
@@ -107,7 +107,7 @@ const NuevaCitaScreen = ({ navigation, route }) => {
                 </TouchableOpacity>
             ))}
 
-            {/* ── Fecha ────────────────────────────────── */}
+            {/*  Fecha  */}
             <Text style={styles.label}>Fecha de la cita (YYYY-MM-DD)</Text>
             {/* TODO (compañeros): reemplazar con DatePicker  */}
             <TextInput
@@ -118,7 +118,7 @@ const NuevaCitaScreen = ({ navigation, route }) => {
                 keyboardType="numeric"
             />
 
-            {/* ── Hora ─────────────────────────────────── */}
+            {/*  Hora  */}
             <Text style={styles.label}>Hora (HH:MM)</Text>
             {/* TODO (compañeros): reemplazar con TimePicker o slots disponibles */}
             <TextInput
@@ -129,7 +129,7 @@ const NuevaCitaScreen = ({ navigation, route }) => {
                 keyboardType="numeric"
             />
 
-            {/* ── Motivo ───────────────────────────────── */}
+            {/*  Motivo  */}
             <Text style={styles.label}>Motivo de consulta (opcional)</Text>
             <TextInput
                 style={[styles.input, { height: 80, textAlignVertical: 'top' }]}
@@ -139,7 +139,7 @@ const NuevaCitaScreen = ({ navigation, route }) => {
                 onChangeText={setMotivo}
             />
 
-            {/* ── Botón ────────────────────────────────── */}
+            {/*  Botón  */}
             <TouchableOpacity
                 style={[styles.boton, loading && { opacity: 0.6 }]}
                 onPress={handleCrearCita}

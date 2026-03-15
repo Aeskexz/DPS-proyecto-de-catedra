@@ -24,10 +24,10 @@ const pool = mysql.createPool({
 const testConnection = async () => {
     try {
         const conn = await pool.getConnection();
-        console.log('✅ Conectado a MySQL correctamente.');
+        console.log(' Conectado a MySQL correctamente.');
         conn.release();
     } catch (error) {
-        console.error('❌ Error al conectar a MySQL:', error.message);
+        console.error(' Error al conectar a MySQL:', error.message);
         process.exit(1); // Detener el servidor si no hay BD
     }
 };

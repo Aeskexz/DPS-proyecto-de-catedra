@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import {
-    View, Text, FlatList, TouchableOpacity, StyleSheet,
+    View, Text, FlatList, TouchableOpacity, StyleSheet, TextInput,
     ActivityIndicator, Alert, RefreshControl, Platform, useWindowDimensions
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -21,6 +21,18 @@ const AdminDashboard = ({ navigation }) => {
     const [clientes, setClientes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
+    const [editingKey, setEditingKey] = useState(null);
+    const [editForm, setEditForm] = useState({
+        nombre: '',
+        apellido: '',
+        email: '',
+        username: '',
+        telefono: '',
+        id_especialidad: '',
+        numero_colegiado: '',
+    });
+    const [savingEdit, setSavingEdit] = useState(false);
+    const [restoringPasswordKey, setRestoringPasswordKey] = useState(null);
 
     // Si la pantalla es ancha (Web/Tablet), mostramos 2 columnas
     const isLargeScreen = width > 800 || Platform.OS === 'web' && width > 600;
@@ -71,47 +83,241 @@ const AdminDashboard = ({ navigation }) => {
             }
             // Agregamos feedback visual tras eliminar
             if (Platform.OS === 'web') {
-                window.alert('✅ Usuario eliminado/desactivado correctamente.');
+                window.alert(' Usuario eliminado/desactivado correctamente.');
             } else {
                 Alert.alert('Éxito', 'Usuario eliminado/desactivado correctamente.');
             }
             cargarDatos();
         } catch (e) {
             if (Platform.OS === 'web') {
-                window.alert('❌ Error: ' + e.message);
+                window.alert(' Error: ' + e.message);
             } else {
                 Alert.alert('Error', e.message);
             }
         }
     };
 
+    const iniciarEdicion = (tipo, item) => {
+        setEditingKey(`${tipo}-${item.id_usuario}`);
+        setEditForm({
+            nombre: item.nombre || '',
+            apellido: item.apellido || '',
+            email: item.email || '',
+            username: item.username || '',
+            telefono: item.telefono || '',
+            id_especialidad: item.id_especialidad ? String(item.id_especialidad) : '',
+            numero_colegiado: item.numero_colegiado || '',
+        });
+    };
+
+    const cancelarEdicion = () => {
+        setEditingKey(null);
+        setEditForm({
+            nombre: '',
+            apellido: '',
+            email: '',
+            username: '',
+            telefono: '',
+            id_especialidad: '',
+            numero_colegiado: '',
+        });
+    };
+
+    const guardarEdicion = async (tipo, itemId) => {
+        if (!editForm.nombre.trim() || !editForm.apellido.trim() || !editForm.email.trim() || !editForm.username.trim()) {
+            Alert.alert('Campos requeridos', 'Nombre, apellido, correo y usuario son obligatorios.');
+            return;
+        }
+
+        if (tipo === 'medico' && !editForm.id_especialidad) {
+            Alert.alert('Campo requerido', 'La especialidad es obligatoria para médicos.');
+            return;
+        }
+
+        setSavingEdit(true);
+        try {
+            if (tipo === 'medico') {
+                await medicosService.editar(itemId, {
+                    nombre: editForm.nombre.trim(),
+                    apellido: editForm.apellido.trim(),
+                    email: editForm.email.trim(),
+                    username: editForm.username.trim(),
+                    telefono: editForm.telefono.trim() || null,
+                    id_especialidad: parseInt(editForm.id_especialidad, 10),
+                    numero_colegiado: editForm.numero_colegiado.trim() || null,
+                });
+            } else {
+                await clientesService.editar(itemId, {
+                    nombre: editForm.nombre.trim(),
+                    apellido: editForm.apellido.trim(),
+                    email: editForm.email.trim(),
+                    username: editForm.username.trim(),
+                    telefono: editForm.telefono.trim() || null,
+                });
+            }
+            Alert.alert('Éxito', 'Registro actualizado correctamente.');
+            cancelarEdicion();
+            cargarDatos();
+        } catch (e) {
+            Alert.alert('Error', e.message);
+        } finally {
+            setSavingEdit(false);
+        }
+    };
+
+    const restaurarPassword = async (tipo, itemId, nombre) => {
+        const ejecutar = async () => {
+            const actionKey = `${tipo}-${itemId}`;
+            setRestoringPasswordKey(actionKey);
+            try {
+                const result = tipo === 'medico'
+                    ? await medicosService.restaurarPassword(itemId)
+                    : await clientesService.restaurarPassword(itemId);
+
+                const mensaje = `${result.message}\n\nContraseña temporal: ${result.password_temporal}`;
+                if (Platform.OS === 'web') {
+                    window.alert(mensaje);
+                } else {
+                    Alert.alert('Contraseña restaurada', mensaje);
+                }
+            } catch (e) {
+                Alert.alert('Error', e.message);
+            } finally {
+                setRestoringPasswordKey(null);
+            }
+        };
+
+        if (Platform.OS === 'web') {
+            if (window.confirm(`¿Restaurar contraseña de ${nombre}?`)) {
+                ejecutar();
+            }
+        } else {
+            Alert.alert(
+                'Restaurar contraseña',
+                `¿Restaurar contraseña de ${nombre}?`,
+                [
+                    { text: 'Cancelar', style: 'cancel' },
+                    { text: 'Restaurar', onPress: ejecutar },
+                ]
+            );
+        }
+    };
+
     if (loading) return <ActivityIndicator style={{ flex: 1 }} size="large" color="#7C3AED" />;
 
-    const renderItemUsuario = ({ item, tipo }) => (
-        <View style={styles.card}>
-            <View style={styles.cardRow}>
-                <Text style={styles.nombre}>{item.nombre} {item.apellido}</Text>
-                <View style={[styles.badge, { backgroundColor: item.activo ? '#DCFCE7' : '#FEE2E2' }]}>
-                    <Text style={[styles.badgeText, { color: item.activo ? '#166534' : '#991B1B' }]}>
-                        {item.activo ? 'ACTIVO' : 'INACTIVO'}
-                    </Text>
-                </View>
-            </View>
-            <Text style={styles.detalles}>@{item.username} · {item.email}</Text>
-            {tipo === 'medico' && <Text style={styles.detalles}>🩺 {item.especialidad}</Text>}
+    const renderItemUsuario = ({ item, tipo }) => {
+        const cardKey = `${tipo}-${item.id_usuario}`;
+        const isEditing = editingKey === cardKey;
+        const isRestoring = restoringPasswordKey === cardKey;
 
-            <TouchableOpacity
-                style={styles.eliminarBtn}
-                onPress={() => confirmarEliminacion(tipo, item.id_usuario, item.nombre)}
-            >
-                <Text style={styles.eliminarText}>Eliminar 🗑</Text>
-            </TouchableOpacity>
-        </View>
-    );
+        return (
+            <View style={styles.card}>
+                <View style={styles.cardRow}>
+                    <Text style={styles.nombre}>{item.nombre} {item.apellido}</Text>
+                    <View style={[styles.badge, { backgroundColor: item.activo ? '#DCFCE7' : '#FEE2E2' }]}>
+                        <Text style={[styles.badgeText, { color: item.activo ? '#166534' : '#991B1B' }]}>
+                            {item.activo ? 'ACTIVO' : 'INACTIVO'}
+                        </Text>
+                    </View>
+                </View>
+                <Text style={styles.detalles}>@{item.username} · {item.email}</Text>
+                {tipo === 'medico' && <Text style={styles.detalles}>{item.especialidad}</Text>}
+
+                <View style={styles.actionsRow}>
+                    <TouchableOpacity style={styles.editarBtn} onPress={() => iniciarEdicion(tipo, item)}>
+                        <Text style={styles.editarText}>Editar</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.restaurarBtn}
+                        onPress={() => restaurarPassword(tipo, item.id_usuario, `${item.nombre} ${item.apellido}`)}
+                        disabled={isRestoring}
+                    >
+                        <Text style={styles.restaurarText}>{isRestoring ? 'Restaurando...' : 'Restaurar contraseña'}</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.eliminarBtn}
+                        onPress={() => confirmarEliminacion(tipo, item.id_usuario, item.nombre)}
+                    >
+                        <Text style={styles.eliminarText}>Eliminar</Text>
+                    </TouchableOpacity>
+                </View>
+
+                {isEditing && (
+                    <View style={styles.editContainer}>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Nombre"
+                            value={editForm.nombre}
+                            onChangeText={(v) => setEditForm((prev) => ({ ...prev, nombre: v }))}
+                        />
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Apellido"
+                            value={editForm.apellido}
+                            onChangeText={(v) => setEditForm((prev) => ({ ...prev, apellido: v }))}
+                        />
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Correo"
+                            autoCapitalize="none"
+                            value={editForm.email}
+                            onChangeText={(v) => setEditForm((prev) => ({ ...prev, email: v }))}
+                        />
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Usuario"
+                            autoCapitalize="none"
+                            value={editForm.username}
+                            onChangeText={(v) => setEditForm((prev) => ({ ...prev, username: v }))}
+                        />
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Teléfono"
+                            value={editForm.telefono}
+                            onChangeText={(v) => setEditForm((prev) => ({ ...prev, telefono: v }))}
+                        />
+
+                        {tipo === 'medico' && (
+                            <>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="ID Especialidad"
+                                    keyboardType="numeric"
+                                    value={editForm.id_especialidad}
+                                    onChangeText={(v) => setEditForm((prev) => ({ ...prev, id_especialidad: v }))}
+                                />
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="N° Colegiado"
+                                    value={editForm.numero_colegiado}
+                                    onChangeText={(v) => setEditForm((prev) => ({ ...prev, numero_colegiado: v }))}
+                                />
+                            </>
+                        )}
+
+                        <View style={styles.editActionsRow}>
+                            <TouchableOpacity
+                                style={styles.guardarBtn}
+                                onPress={() => guardarEdicion(tipo, item.id_usuario)}
+                                disabled={savingEdit}
+                            >
+                                <Text style={styles.guardarText}>{savingEdit ? 'Guardando...' : 'Guardar'}</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.cancelarBtn} onPress={cancelarEdicion}>
+                                <Text style={styles.cancelarText}>Cancelar</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                )}
+            </View>
+        );
+    };
 
     return (
         <SafeAreaView style={styles.container} edges={['top']}>
-            {/* ── Header ───────────────────────────────────── */}
+            {/*  Header  */}
             <View style={styles.header}>
                 <View style={[styles.headerInfo, width < 760 && styles.headerInfoMobile]}>
                     <Text style={styles.titulo}>Panel de Control Supremo</Text>
@@ -130,13 +336,13 @@ const AdminDashboard = ({ navigation }) => {
                 </View>
             </View>
 
-            {/* ── Contenido Dual ───────────────────────────── */}
+            {/*  Contenido Dual  */}
             <View style={[styles.contentRow, isLargeScreen ? { flexDirection: 'row' } : { flexDirection: 'column' }]}>
 
-                {/* ── Columna Pacientes (Izquierda) ──────────── */}
+                {/*  Columna Pacientes (Izquierda)  */}
                 <View style={[styles.columna, isLargeScreen && { marginRight: 8 }]}>
                     <View style={styles.columnaHeader}>
-                        <Text style={styles.columnaTitulo}>🤒 Pacientes</Text>
+                        <Text style={styles.columnaTitulo}> Pacientes</Text>
                     </View>
                     <FlatList
                         data={clientes}
@@ -149,10 +355,10 @@ const AdminDashboard = ({ navigation }) => {
                     />
                 </View>
 
-                {/* ── Columna Médicos (Derecha) ──────────────── */}
+                {/*  Columna Médicos (Derecha)  */}
                 <View style={[styles.columna, isLargeScreen && { marginLeft: 8 }, !isLargeScreen && { marginTop: 20 }]}>
                     <View style={[styles.columnaHeader, { backgroundColor: '#E0E7FF' }]}>
-                        <Text style={[styles.columnaTitulo, { color: '#3730A3' }]}>👨‍⚕️ Médicos</Text>
+                        <Text style={[styles.columnaTitulo, { color: '#3730A3' }]}> Médicos</Text>
                     </View>
                     <FlatList
                         data={medicos}
@@ -206,8 +412,32 @@ const styles = StyleSheet.create({
     badgeText: { fontSize: 10, fontWeight: 'bold' },
     detalles: { color: '#64748B', fontSize: 13, marginBottom: 2 },
 
-    eliminarBtn: { marginTop: 10, alignSelf: 'flex-start', backgroundColor: '#FEE2E2', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 6 },
+    actionsRow: { flexDirection: 'row', gap: 8, marginTop: 10, flexWrap: 'wrap' },
+    editarBtn: { alignSelf: 'flex-start', backgroundColor: '#DBEAFE', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 6 },
+    editarText: { color: '#1D4ED8', fontWeight: 'bold', fontSize: 12 },
+    restaurarBtn: { alignSelf: 'flex-start', backgroundColor: '#FEF3C7', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 6 },
+    restaurarText: { color: '#92400E', fontWeight: 'bold', fontSize: 12 },
+
+    eliminarBtn: { alignSelf: 'flex-start', backgroundColor: '#FEE2E2', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 6 },
     eliminarText: { color: '#DC2626', fontWeight: 'bold', fontSize: 12 },
+
+    editContainer: { marginTop: 12, borderTopWidth: 1, borderTopColor: '#E2E8F0', paddingTop: 12 },
+    input: {
+        borderWidth: 1,
+        borderColor: '#CBD5E1',
+        borderRadius: 8,
+        paddingHorizontal: 10,
+        paddingVertical: 8,
+        marginBottom: 8,
+        backgroundColor: '#F8FAFC',
+        fontSize: 13,
+    },
+    editActionsRow: { flexDirection: 'row', gap: 8 },
+    guardarBtn: { backgroundColor: '#2563EB', paddingHorizontal: 10, paddingVertical: 8, borderRadius: 6 },
+    guardarText: { color: '#fff', fontWeight: '700', fontSize: 12 },
+    cancelarBtn: { backgroundColor: '#E2E8F0', paddingHorizontal: 10, paddingVertical: 8, borderRadius: 6 },
+    cancelarText: { color: '#334155', fontWeight: '700', fontSize: 12 },
+
     vacio: { textAlign: 'center', color: '#94A3B8', marginTop: 40, fontSize: 15 },
 });
 

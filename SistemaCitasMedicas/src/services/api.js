@@ -62,7 +62,7 @@ api.interceptors.response.use(
     }
 );
 
-// ── Servicios de Auth ─────────────────────────────────────
+//  Servicios de Auth 
 export const authService = {
     login: (username, password) => api.post('/auth/login', { username, password }),
     register: (datos) => api.post('/auth/register', datos),
@@ -70,7 +70,7 @@ export const authService = {
     eliminarMiCuenta: (password) => api.delete('/auth/me', { data: { password } }),
 };
 
-// ── Servicios de Citas ────────────────────────────────────
+//  Servicios de Citas 
 export const citasService = {
     getMisCitas: () => api.get('/citas'),
     crearCita: (datos) => api.post('/citas', datos),
@@ -79,22 +79,26 @@ export const citasService = {
     eliminarCita: (id) => api.delete(`/citas/${id}`),
 };
 
-// ── Servicios de Médicos ──────────────────────────────────
+//  Servicios de Médicos 
 export const medicosService = {
     getLista: () => api.get('/medicos'),
     getDetalle: (id) => api.get(`/medicos/${id}`),
     registrar: (datos) => api.post('/medicos', datos),
+    editar: (id, datos) => api.put(`/medicos/${id}`, datos),
+    restaurarPassword: (id) => api.put(`/medicos/${id}/restaurar-password`),
     eliminar: (id) => api.delete(`/medicos/${id}`),
 };
 
-// ── Servicios de Especialidades ───────────────────────────
+//  Servicios de Especialidades 
 export const especialidadesService = {
     getLista: () => api.get('/especialidades'),
 };
 
-// ── Servicios de Clientes (Pacientes) ─────────────────────
+//  Servicios de Clientes (Pacientes) 
 export const clientesService = {
     getLista: () => api.get('/clientes'),
+    editar: (id, datos) => api.put(`/clientes/${id}`, datos),
+    restaurarPassword: (id) => api.put(`/clientes/${id}/restaurar-password`),
     eliminar: (id) => api.delete(`/clientes/${id}`),
 };
 

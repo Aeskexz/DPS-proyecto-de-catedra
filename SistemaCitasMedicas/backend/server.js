@@ -19,31 +19,31 @@ const cors = require('cors');
 
 const app = express();
 
-// ── Middleware global ─────────────────────────────────────
+//  Middleware global 
 app.use(cors());
 app.use(express.json());
 
-// ── Rutas ────────────────────────────────────────────────
+//  Rutas 
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/citas', require('./routes/citas'));
 app.use('/api/medicos', require('./routes/medicos'));
 app.use('/api/especialidades', require('./routes/especialidades'));
 app.use('/api/clientes', require('./routes/clientes'));
 
-// ── Ruta de salud (health-check) ─────────────────────────
+//  Ruta de salud (health-check) 
 app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date() }));
 
-// ── Manejo de rutas no encontradas ───────────────────────
+//  Manejo de rutas no encontradas 
 app.use((req, res) => res.status(404).json({ message: 'Ruta no encontrada.' }));
 
-// ── Manejo global de errores ──────────────────────────────
+//  Manejo global de errores 
 app.use((err, req, res, next) => {
     console.error('Error no manejado:', err);
     res.status(500).json({ message: 'Error interno del servidor.' });
 });
 
-// ── Iniciar servidor ─────────────────────────────────────
+//  Iniciar servidor 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-    console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
+    console.log(` Servidor corriendo en http://localhost:${PORT}`);
 });

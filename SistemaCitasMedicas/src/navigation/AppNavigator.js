@@ -18,19 +18,19 @@ import { ActivityIndicator, View } from 'react-native';
 
 import { useAuth } from '../context/AuthContext';
 
-// ── Pantallas de Auth ─────────────────────────────────────
+//  Pantallas de Auth 
 import LoginScreen from '../screens/auth/LoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
 
-// ── Pantallas de Cliente ──────────────────────────────────
+//  Pantallas de Cliente 
 import ClienteDashboard from '../screens/cliente/ClienteDashboard';
 import NuevaCitaScreen from '../screens/cliente/NuevaCitaScreen';
 
-// ── Pantallas de Médico ───────────────────────────────────
+//  Pantallas de Médico 
 import MedicoDashboard from '../screens/medico/MedicoDashboard';
 import DetalleCitaMedico from '../screens/medico/DetalleCitaMedico';
 
-// ── Pantallas de Admin ────────────────────────────────────
+//  Pantallas de Admin 
 import AdminDashboard from '../screens/admin/AdminDashboard';
 import GestionMedicos from '../screens/admin/GestionMedicos';
 import RegistrarMedico from '../screens/admin/RegistrarMedico';
@@ -54,27 +54,27 @@ const AppNavigator = () => {
         <NavigationContainer>
             <Stack.Navigator screenOptions={{ headerShown: false }}>
                 {!user ? (
-                    // ── Sin sesión: mostrar Auth ─────────────────────
+                    //  Sin sesión: mostrar Auth 
                     <>
                         <Stack.Screen name="Login" component={LoginScreen} />
                         <Stack.Screen name="Register" component={RegisterScreen} />
                     </>
                 ) : user.rol === 'cliente' ? (
-                    // ── Rol: cliente ─────────────────────────────────
+                    //  Rol: cliente 
                     <>
                         <Stack.Screen name="ClienteDashboard" component={ClienteDashboard} />
                         <Stack.Screen name="NuevaCita" component={NuevaCitaScreen} />
                         <Stack.Screen name="AjustesCuenta" component={AjustesCuentaScreen} />
                     </>
                 ) : user.rol === 'medico' ? (
-                    // ── Rol: médico ───────────────────────────────────
+                    //  Rol: médico 
                     <>
                         <Stack.Screen name="MedicoDashboard" component={MedicoDashboard} />
                         <Stack.Screen name="DetalleCitaMedico" component={DetalleCitaMedico} />
                         <Stack.Screen name="AjustesCuenta" component={AjustesCuentaScreen} />
                     </>
                 ) : user.rol === 'administrador' ? (
-                    // ── Rol: administrador ────────────────────────────
+                    //  Rol: administrador 
                     <>
                         <Stack.Screen name="AdminDashboard" component={AdminDashboard} />
                         <Stack.Screen name="GestionMedicos" component={GestionMedicos} />
@@ -82,7 +82,7 @@ const AppNavigator = () => {
                         <Stack.Screen name="AjustesCuenta" component={AjustesCuentaScreen} />
                     </>
                 ) : (
-                    // ── Rol Desconocido Fallback ───────────────────────
+                    //  Rol Desconocido Fallback 
                     <Stack.Screen name="Login" component={LoginScreen} />
                 )}
             </Stack.Navigator>

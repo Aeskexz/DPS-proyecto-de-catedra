@@ -26,6 +26,15 @@ const { verifyToken, requireRole } = require('../middleware/auth');
 
 const ADMIN = 1;
 
+const generarPasswordTemporal = () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+    let password = 'Temp';
+    for (let i = 0; i < 8; i++) {
+        password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return password;
+};
+
 // -----------------------------------------------------------
 // GET /api/medicos
 // Cualquier usuario autenticado puede ver la lista de médicos.
@@ -126,6 +135,83 @@ router.post('/', verifyToken, requireRole([ADMIN]), async (req, res) => {
         });
     } catch (error) {
         console.error('Error en POST /medicos:', error);
+        res.status(500).json({ message: 'Error interno del servidor.' });
+    }
+});
+
+// -----------------------------------------------------------
+// PUT /api/medicos/:id — Solo admin
+// Editar datos básicos del médico por id_usuario
+// -----------------------------------------------------------
+router.put('/:id', verifyToken, requireRole([ADMIN]), async (req, res) => {
+    const { id } = req.params;
+    const { nombre, apellido, email, username, id_especialidad, numero_colegiado, telefono } = req.body;
+
+    if (!nombre || !apellido || !email || !username || !id_especialidad) {
+        return res.status(400).json({ message: 'Faltan campos obligatorios.' });
+    }
+
+    try {
+        const [exist] = await pool.query(
+            'SELECT id_usuario FROM usuarios WHERE (email = ? OR username = ?) AND id_usuario <> ?',
+            [email.trim(), username.trim(), id]
+        );
+        if (exist.length > 0) {
+            return res.status(409).json({ message: 'El correo o nombre de usuario ya está en uso.' });
+        }
+
+        const [result] = await pool.query(
+            `UPDATE usuarios
+             SET nombre = ?, apellido = ?, email = ?, username = ?
+             WHERE id_usuario = ? AND id_rol = (SELECT id_rol FROM roles WHERE nombre_rol = 'medico' LIMIT 1)`,
+            [nombre.trim(), apellido.trim(), email.trim(), username.trim(), id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Médico no encontrado.' });
+        }
+
+        await pool.query(
+            `UPDATE medicos
+             SET id_especialidad = ?, numero_colegiado = ?, telefono = ?
+             WHERE id_usuario = ?`,
+            [id_especialidad, numero_colegiado?.trim() || null, telefono?.trim() || null, id]
+        );
+
+        res.json({ message: 'Médico actualizado correctamente.' });
+    } catch (error) {
+        console.error('Error en PUT /medicos/:id:', error);
+        res.status(500).json({ message: 'Error interno del servidor.' });
+    }
+});
+
+// -----------------------------------------------------------
+// PUT /api/medicos/:id/restaurar-password — Solo admin
+// -----------------------------------------------------------
+router.put('/:id/restaurar-password', verifyToken, requireRole([ADMIN]), async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const passwordTemporal = generarPasswordTemporal();
+        const password_hash = await bcrypt.hash(passwordTemporal, 12);
+
+        const [result] = await pool.query(
+            `UPDATE usuarios
+             SET password_hash = ?
+             WHERE id_usuario = ? AND id_rol = (SELECT id_rol FROM roles WHERE nombre_rol = 'medico' LIMIT 1)`,
+            [password_hash, id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Médico no encontrado.' });
+        }
+
+        res.json({
+            message: 'Contraseña del médico restaurada correctamente.',
+            password_temporal: passwordTemporal,
+        });
+    } catch (error) {
+        console.error('Error restaurando contraseña de médico:', error);
         res.status(500).json({ message: 'Error interno del servidor.' });
     }
 });

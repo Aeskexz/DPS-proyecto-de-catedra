@@ -9,7 +9,7 @@
 
 ---
 
-## 📋 Información de Licencia
+##  Información de Licencia
 
 Este proyecto está bajo la licencia **Creative Commons Attribution-ShareAlike 4.0 International (CC-BY-SA 4.0)**.
 
@@ -19,7 +19,7 @@ Este proyecto está bajo la licencia **Creative Commons Attribution-ShareAlike 4
 
 ---
 
-## 👥 Autores y Contributores Originales
+##  Autores y Contributores Originales
 
 ### Equipo de Desarrollo Original
 
@@ -30,7 +30,7 @@ Este proyecto está bajo la licencia **Creative Commons Attribution-ShareAlike 4
 
 ---
 
-## 📦 Dependencias y Sus Licencias
+##  Dependencias y Sus Licencias
 
 Este proyecto utiliza las siguientes librerías:
 
@@ -61,7 +61,7 @@ Este proyecto utiliza las siguientes librerías:
 
 ---
 
-## 📄 Reconocimientos Especiales
+##  Reconocimientos Especiales
 
 ### Bases de Datos
 - MySQL Community Edition - GPL v2
@@ -77,7 +77,7 @@ Este proyecto utiliza las siguientes librerías:
 
 ---
 
-## 🔄 Cómo Atribuir este Proyecto
+##  Cómo Atribuir este Proyecto
 
 Si utilizas este proyecto, por favor incluye:
 
@@ -122,14 +122,14 @@ https://creativecommons.org/licenses/by-sa/4.0/
 
 ---
 
-## 🛠️ Cambios Respecto a la Versión Original
+##  Cambios Respecto a la Versión Original
 
 ### Versión 1.0.0 (2024-2026)
-- ✅ Estructura básica del proyecto
-- ✅ Backend Express con autenticación JWT
-- ✅ Frontend React Native con navegación por roles
-- ✅ Integración con MySQL
-- ✅ Implementación de licencias Creative Commons
+-  Estructura básica del proyecto
+-  Backend Express con autenticación JWT
+-  Frontend React Native con navegación por roles
+-  Integración con MySQL
+-  Implementación de licencias Creative Commons
 
 ### Versión 1.1.0 (En Desarrollo)
 - ⏳ Mejoras de UI/UX
@@ -138,7 +138,7 @@ https://creativecommons.org/licenses/by-sa/4.0/
 
 ---
 
-## 📞 Contacto y Soporte
+##  Contacto y Soporte
 
 Para preguntas sobre la licencia o contribuciones, consulta:
 
@@ -148,7 +148,7 @@ Para preguntas sobre la licencia o contribuciones, consulta:
 
 ---
 
-## 📞 Reportar Problemas de Licencia
+##  Reportar Problemas de Licencia
 
 Si encuentras un problema con la atribución o el cumplimiento de la licencia:
 
@@ -158,23 +158,23 @@ Si encuentras un problema con la atribución o el cumplimiento de la licencia:
 
 ---
 
-## ✅ Cumplimiento de Licencia
+##  Cumplimiento de Licencia
 
 Este proyecto cumple con todos los requisitos de CC-BY-SA 4.0:
 
-- ✅ Archivo LICENSE con texto completo
-- ✅ Archivo LICENSE.es con versión en español
-- ✅ Identificador SPDX en package.json
-- ✅ Atribución en README.md
-- ✅ Documentación de términos en LICENCIAS.md
-- ✅ Guía de implementación en PLANTILLAS_LICENCIA.md
-- ✅ Comparativa de opciones en LICENCIAS_COMPARATIVA.md
-- ✅ Este archivo NOTICE con autores y dependencias
-- ✅ Encabezados en archivos principales
+-  Archivo LICENSE con texto completo
+-  Archivo LICENSE.es con versión en español
+-  Identificador SPDX en package.json
+-  Atribución en README.md
+-  Documentación de términos en LICENCIAS.md
+-  Guía de implementación en PLANTILLAS_LICENCIA.md
+-  Comparativa de opciones en LICENCIAS_COMPARATIVA.md
+-  Este archivo NOTICE con autores y dependencias
+-  Encabezados en archivos principales
 
 ---
 
-## 🔐 Disclaimer
+##  Disclaimer
 
 Creative Commons es NOT un despacho de abogados y NO proporciona servicios legales. 
 

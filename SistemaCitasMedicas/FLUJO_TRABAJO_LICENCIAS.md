@@ -1,4 +1,4 @@
-# 🔐 Guía de Implementación de Licencias - Flujo de Trabajo
+#  Guía de Implementación de Licencias - Flujo de Trabajo
 
 ## Control de Versiones y Licencias
 
@@ -6,24 +6,24 @@ Este documento explica cómo mantener las licencias Creative Commons en tu flujo
 
 ---
 
-## 📌 Archivos de Licencia Principales
+##  Archivos de Licencia Principales
 
 Todos estos archivos **DEBEN estar en la raíz del proyecto** y **NO deben ser modificados** (exceto NOTICE.md):
 
 ```
 SistemaCitasMedicas/
-├── LICENSE                      # CC-BY-SA 4.0 completo (Inglés)
-├── LICENSE.es                   # CC-BY-SA 4.0 completo (Español)
-├── NOTICE.md                    # Autores y dependencias
-├── LICENCIAS.md                 # Guía de implementación
-├── LICENCIAS_COMPARATIVA.md     # Comparativa de licencias
-├── PLANTILLAS_LICENCIA.md       # Ejemplos de uso
-└── package.json                 # Con "license": "CC-BY-SA-4.0"
+ LICENSE                      # CC-BY-SA 4.0 completo (Inglés)
+ LICENSE.es                   # CC-BY-SA 4.0 completo (Español)
+ NOTICE.md                    # Autores y dependencias
+ LICENCIAS.md                 # Guía de implementación
+ LICENCIAS_COMPARATIVA.md     # Comparativa de licencias
+ PLANTILLAS_LICENCIA.md       # Ejemplos de uso
+ package.json                 # Con "license": "CC-BY-SA-4.0"
 ```
 
 ---
 
-## ✅ Checklist: Antes de Hacer Push
+##  Checklist: Antes de Hacer Push
 
 ### 1. Verificar Archivos de Licencia
 ```bash
@@ -56,7 +56,7 @@ grep -l "LICENCIA\|LICENSE" App.js src/**/*.js backend/**/*.js
 
 ---
 
-## 🔄 Proceso de Contribución
+##  Proceso de Contribución
 
 ### Paso 1: Clonar el Repositorio
 ```bash
@@ -106,7 +106,7 @@ git push origin feature/mi-mejora
 
 ---
 
-## 🔧 Pre-commit Hook (Opcional)
+##  Pre-commit Hook (Opcional)
 
 Para verificar automáticamente que los archivos tengan la licencia:
 
@@ -120,21 +120,21 @@ echo "Verificando archivos de licencia..."
 
 # Checkear que LICENSE existe
 if [ ! -f LICENSE ]; then
-    echo "❌ ERROR: Archivo LICENSE no encontrado"
+    echo " ERROR: Archivo LICENSE no encontrado"
     exit 1
 fi
 
 # Checkear package.json
 if ! grep -q '"license": "CC-BY-SA-4.0"' package.json; then
-    echo "⚠️  ADVERTENCIA: package.json no tiene license field correcto"
+    echo "  ADVERTENCIA: package.json no tiene license field correcto"
 fi
 
 # Checkear README
 if ! grep -qi "licencia\|license" README.md; then
-    echo "⚠️  ADVERTENCIA: README.md no menciona la licencia"
+    echo "  ADVERTENCIA: README.md no menciona la licencia"
 fi
 
-echo "✅ Verificación completada"
+echo " Verificación completada"
 exit 0
 ```
 
@@ -145,7 +145,7 @@ chmod +x .git/hooks/pre-commit
 
 ---
 
-## 📝 Actualizar NOTICE.md
+##  Actualizar NOTICE.md
 
 Cuando se agreguen nuevos autores o cambios importantes:
 
@@ -163,7 +163,7 @@ git commit -m "docs: actualizar NOTICE.md con nuevo contribuyente"
 
 ---
 
-## 🔄 Flujo Completo: Ejemplo
+##  Flujo Completo: Ejemplo
 
 ### Escenario: Agregar nueva funcionalidad
 
@@ -207,35 +207,35 @@ git push origin feature/nueva-caracteristica
 
 ---
 
-## 🚨 Cosas a EVITAR
+##  Cosas a EVITAR
 
-### ❌ NO HAGAS:
+###  NO HAGAS:
 
 1. **Cambiar la licencia sin autorización**
    ```bash
-   # ❌ INCORRECTO
+   #  INCORRECTO
    rm LICENSE
    echo "MIT License" > LICENSE
    ```
 
 2. **Eliminar archivos de licencia**
    ```bash
-   # ❌ INCORRECTO
+   #  INCORRECTO
    git rm LICENSE LICENSE.es
    ```
 
 3. **Modificar contenido de LICENSE/LICENSE.es**
    ```bash
-   # ❌ INCORRECTO
+   #  INCORRECTO
    echo "Mis términos personalizados" >> LICENSE
    ```
 
 4. **Ignorar la licencia en archivos nuevos**
    ```bash
-   // ❌ INCORRECTO - SIN LICENCIA
+   //  INCORRECTO - SIN LICENCIA
    function miFuncion() {}
    
-   // ✅ CORRECTO - CON LICENCIA
+   //  CORRECTO - CON LICENCIA
    /**
     * LICENCIA: CC-BY-SA 4.0
     */
@@ -244,15 +244,15 @@ git push origin feature/nueva-caracteristica
 
 5. **Usar otra licencia sin consenso**
    ```bash
-   # ❌ INCORRECTO
+   #  INCORRECTO
    "license": "MIT"  // debería ser "CC-BY-SA-4.0"
    ```
 
 ---
 
-## ✅ Cosas que SÍ DEBES HACER
+##  Cosas que SÍ DEBES HACER
 
-### ✅ SÍ DEBES:
+###  SÍ DEBES:
 
 1. **Mantener archivos de licencia sincronizados**
    ```bash
@@ -289,7 +289,7 @@ git push origin feature/nueva-caracteristica
 
 ---
 
-## 📋 Comandos Útiles
+##  Comandos Útiles
 
 ### Verificar Licencia en Archivos
 ```bash
@@ -319,15 +319,15 @@ grep -c "Creative Commons" LICENSE  # Debe encontrar múltiples coincidencias
 
 ---
 
-## 🔐 Proteger la Licencia
+##  Proteger la Licencia
 
 ### En GitHub (Recomendado)
 
 1. **Ir a Settings > Branches**
 2. **Crear regla de protección para main:**
-   - ✅ Require pull request reviews before merging
-   - ✅ Require status checks to pass
-   - ✅ Include administrators
+   -  Require pull request reviews before merging
+   -  Require status checks to pass
+   -  Include administrators
 
 3. **En el PR template** (crear `.github/pull_request_template.md`):
 ```markdown
@@ -341,7 +341,7 @@ grep -c "Creative Commons" LICENSE  # Debe encontrar múltiples coincidencias
 
 ---
 
-## 📚 Referencias Rápidas
+##  Referencias Rápidas
 
 | Tarea | Comando/Archivo |
 |-------|-----------------|
@@ -355,7 +355,7 @@ grep -c "Creative Commons" LICENSE  # Debe encontrar múltiples coincidencias
 
 ---
 
-## 🎓 Educación del Equipo
+##  Educación del Equipo
 
 ### Para Nuevos Contribuyentes:
 
@@ -375,7 +375,7 @@ grep -c "Creative Commons" LICENSE  # Debe encontrar múltiples coincidencias
 
 ---
 
-## 📞 Soporte
+##  Soporte
 
 Si tienes dudas sobre la licencia:
 

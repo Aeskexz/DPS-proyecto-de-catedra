@@ -46,12 +46,12 @@ const LoginScreen = ({ navigation }) => {
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
             <View style={styles.card}>
-                {/* ── Logo / Título ─────────────────────────────── */}
+                {/*  Logo / Título  */}
                 {/* TODO (compañeros): reemplazar con logo de la clínica */}
-                <Text style={styles.titulo}>🏥 CitasMéd</Text>
+                <Text style={styles.titulo}> CitasMéd</Text>
                 <Text style={styles.subtitulo}>Inicia sesión en tu cuenta</Text>
 
-                {/* ── Campos ────────────────────────────────────── */}
+                {/*  Campos  */}
                 <Text style={styles.label}>Usuario</Text>
                 <TextInput
                     style={styles.input}
@@ -70,7 +70,7 @@ const LoginScreen = ({ navigation }) => {
                     onChangeText={setPassword}
                 />
 
-                {/* ── Botón Login ───────────────────────────────── */}
+                {/*  Botón Login  */}
                 <TouchableOpacity
                     style={[styles.boton, loading && styles.botonDesactivado]}
                     onPress={handleLogin}
@@ -83,7 +83,7 @@ const LoginScreen = ({ navigation }) => {
                     )}
                 </TouchableOpacity>
 
-                {/* ── Ir a Registro ─────────────────────────────── */}
+                {/*  Ir a Registro  */}
                 <TouchableOpacity onPress={() => navigation.navigate('Register')}>
                     <Text style={styles.link}>¿No tienes cuenta? Regístrate como paciente</Text>
                 </TouchableOpacity>

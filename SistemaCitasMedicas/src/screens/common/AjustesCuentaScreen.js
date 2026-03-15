@@ -19,6 +19,7 @@ const AjustesCuentaScreen = ({ navigation }) => {
     const { user, updateMiCuenta, eliminarMiCuenta } = useAuth();
     const { width } = useWindowDimensions();
     const { horizontalPadding, contentMaxWidth } = getResponsive(width);
+    const esAdmin = user?.rol === 'administrador' || user?.id_rol === 1;
 
     const [nombre, setNombre] = useState(user?.nombre || '');
     const [apellido, setApellido] = useState(user?.apellido || '');
@@ -26,6 +27,7 @@ const AjustesCuentaScreen = ({ navigation }) => {
 
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
+    const [confirmNewPassword, setConfirmNewPassword] = useState('');
 
     const [deletePassword, setDeletePassword] = useState('');
     const [loadingUpdate, setLoadingUpdate] = useState(false);
@@ -60,12 +62,16 @@ const AjustesCuentaScreen = ({ navigation }) => {
     };
 
     const handleCambiarPassword = async () => {
-        if (!currentPassword || !newPassword) {
-            return showMessage('Campos requeridos', 'Debes ingresar contraseña actual y nueva contraseña.');
+        if (!currentPassword || !newPassword || !confirmNewPassword) {
+            return showMessage('Campos requeridos', 'Debes ingresar contraseña actual, nueva contraseña y su confirmación.');
         }
 
         if (newPassword.length < 8) {
             return showMessage('Contraseña inválida', 'La nueva contraseña debe tener al menos 8 caracteres.');
+        }
+
+        if (newPassword !== confirmNewPassword) {
+            return showMessage('Contraseñas no coinciden', 'La confirmación de la nueva contraseña no coincide.');
         }
 
         setLoadingUpdate(true);
@@ -76,6 +82,7 @@ const AjustesCuentaScreen = ({ navigation }) => {
             });
             setCurrentPassword('');
             setNewPassword('');
+            setConfirmNewPassword('');
             showMessage('Éxito', 'Tu contraseña fue actualizada.');
         } catch (error) {
             showMessage('Error', error.message);
@@ -171,27 +178,42 @@ const AjustesCuentaScreen = ({ navigation }) => {
                         onChangeText={setNewPassword}
                     />
 
+                    <Text style={styles.label}>Confirmar nueva contraseña</Text>
+                    <TextInput
+                        style={styles.input}
+                        secureTextEntry
+                        value={confirmNewPassword}
+                        onChangeText={setConfirmNewPassword}
+                    />
+
                     <TouchableOpacity style={styles.primaryBtn} onPress={handleCambiarPassword} disabled={loadingUpdate}>
                         {loadingUpdate ? <ActivityIndicator color="#fff" /> : <Text style={styles.primaryBtnText}>Actualizar contraseña</Text>}
                     </TouchableOpacity>
                 </View>
 
-                <View style={styles.cardDanger}>
-                    <Text style={styles.sectionTitle}>Eliminar cuenta</Text>
-                    <Text style={styles.warningText}>Esta acción elimina tu cuenta de forma permanente.</Text>
+                {esAdmin ? (
+                    <View style={styles.card}>
+                        <Text style={styles.sectionTitle}>Seguridad de cuenta</Text>
+                        <Text style={styles.infoText}>La cuenta administrador está protegida y no se puede eliminar para evitar pérdida de acceso al sistema.</Text>
+                    </View>
+                ) : (
+                    <View style={styles.cardDanger}>
+                        <Text style={styles.sectionTitle}>Eliminar cuenta</Text>
+                        <Text style={styles.warningText}>Esta acción elimina tu cuenta de forma permanente.</Text>
 
-                    <Text style={styles.label}>Confirma tu contraseña</Text>
-                    <TextInput
-                        style={styles.input}
-                        secureTextEntry
-                        value={deletePassword}
-                        onChangeText={setDeletePassword}
-                    />
+                        <Text style={styles.label}>Confirma tu contraseña</Text>
+                        <TextInput
+                            style={styles.input}
+                            secureTextEntry
+                            value={deletePassword}
+                            onChangeText={setDeletePassword}
+                        />
 
-                    <TouchableOpacity style={styles.dangerBtn} onPress={confirmarEliminacion} disabled={loadingDelete}>
-                        {loadingDelete ? <ActivityIndicator color="#fff" /> : <Text style={styles.dangerBtnText}>Eliminar mi cuenta</Text>}
-                    </TouchableOpacity>
-                </View>
+                        <TouchableOpacity style={styles.dangerBtn} onPress={confirmarEliminacion} disabled={loadingDelete}>
+                            {loadingDelete ? <ActivityIndicator color="#fff" /> : <Text style={styles.dangerBtnText}>Eliminar mi cuenta</Text>}
+                        </TouchableOpacity>
+                    </View>
+                )}
                 </View>
             </ScrollView>
         </KeyboardAvoidingView>
@@ -244,6 +266,7 @@ const styles = StyleSheet.create({
     },
     primaryBtnText: { color: '#fff', fontWeight: '700' },
     warningText: { color: '#991B1B', marginBottom: 10 },
+    infoText: { color: '#334155', marginBottom: 4 },
     dangerBtn: {
         backgroundColor: '#DC2626',
         borderRadius: 10,

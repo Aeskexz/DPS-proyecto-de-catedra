@@ -168,14 +168,14 @@ function miFunc(param1) {
 // ============================================================
 
 /*
-✅ BENEFICIOS:
+ BENEFICIOS:
 - Claridad: Todos saben que el código es CC-BY-SA 4.0
 - Cumplimiento: Asegura que cumples con los términos
 - Comunidad: Facilita contribuciones externas
 - Transparencia: Tus usuarios saben sus derechos
 - Profesionalismo: Muestra madurez del proyecto
 
-❌ SI NO LO HACES:
+ SI NO LO HACES:
 - Usuarios asumen que pueden hacer lo que quieran (incorrecto)
 - Posibles disputas legales sobre derechos
 - Incumplimiento de los términos de CC-BY-SA 4.0

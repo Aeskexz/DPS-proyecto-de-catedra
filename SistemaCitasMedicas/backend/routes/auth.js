@@ -234,6 +234,10 @@ router.delete('/me', verifyToken, async (req, res) => {
     const { password } = req.body;
     const { id_usuario, id_rol } = req.user;
 
+    if (id_rol === 1) {
+        return res.status(403).json({ message: 'La cuenta administrador no puede eliminarse.' });
+    }
+
     if (!password) {
         return res.status(400).json({ message: 'Debes confirmar tu contraseña.' });
     }

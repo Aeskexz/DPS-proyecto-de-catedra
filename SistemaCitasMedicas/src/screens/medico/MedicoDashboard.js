@@ -67,8 +67,8 @@ const MedicoDashboard = ({ navigation }) => {
                     </View>
                 </View>
                 <Text style={styles.email}>{item.email_paciente}</Text>
-                <Text style={styles.fecha}>📅 {item.fecha_cita}  🕐 {item.hora_cita?.slice(0, 5)}</Text>
-                {item.motivo_consulta ? <Text style={styles.motivo}>📋 {item.motivo_consulta}</Text> : null}
+                <Text style={styles.fecha}> {item.fecha_cita}   {item.hora_cita?.slice(0, 5)}</Text>
+                {item.motivo_consulta ? <Text style={styles.motivo}> {item.motivo_consulta}</Text> : null}
             </TouchableOpacity>
         );
     };
