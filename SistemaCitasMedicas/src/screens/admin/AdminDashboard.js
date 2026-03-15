@@ -10,6 +10,7 @@ import {
     View, Text, FlatList, TouchableOpacity, StyleSheet,
     ActivityIndicator, Alert, RefreshControl, Platform, useWindowDimensions
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
 import { medicosService, clientesService } from '../../services/api';
 
@@ -109,16 +110,19 @@ const AdminDashboard = ({ navigation }) => {
     );
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container} edges={['top']}>
             {/* ── Header ───────────────────────────────────── */}
             <View style={styles.header}>
-                <View>
+                <View style={[styles.headerInfo, width < 760 && styles.headerInfoMobile]}>
                     <Text style={styles.titulo}>Panel de Control Supremo</Text>
                     <Text style={styles.subtitulo}>{user.nombre} · {medicos.length} Médicos · {clientes.length} Pacientes</Text>
                 </View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15 }}>
+                <View style={[styles.headerActions, width < 760 && styles.headerActionsMobile]}>
                     <TouchableOpacity style={styles.addBtn} onPress={() => navigation.navigate('RegistrarMedico', { onVolver: cargarDatos })}>
                         <Text style={styles.addBtnTexto}>+ Registrar Médico</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => navigation.navigate('AjustesCuenta')}>
+                        <Text style={styles.settings}>Ajustes</Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={logout}>
                         <Text style={styles.logout}>Salir</Text>
@@ -161,7 +165,7 @@ const AdminDashboard = ({ navigation }) => {
                 </View>
 
             </View>
-        </View>
+        </SafeAreaView>
     );
 };
 
@@ -169,11 +173,18 @@ const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#F8FAFC' },
     header: {
         flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-        backgroundColor: '#0F172A', padding: 20, paddingTop: Platform.OS === 'ios' ? 50 : 20,
+        backgroundColor: '#0F172A', paddingHorizontal: 20, paddingVertical: 16,
+        flexWrap: 'wrap',
+        rowGap: 10,
         elevation: 4, zIndex: 10
     },
+    headerInfo: { flexShrink: 1 },
+    headerInfoMobile: { width: '100%' },
     titulo: { fontSize: 20, fontWeight: 'bold', color: '#F8FAFC' },
     subtitulo: { color: '#94A3B8', fontSize: 13, marginTop: 4 },
+    headerActions: { flexDirection: 'row', alignItems: 'center', gap: 15 },
+    headerActionsMobile: { width: '100%', justifyContent: 'space-between', flexWrap: 'wrap' },
+    settings: { color: '#BFDBFE', fontWeight: 'bold', fontSize: 15 },
     logout: { color: '#FCA5A5', fontWeight: 'bold', fontSize: 15 },
     addBtn: { backgroundColor: '#3B82F6', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6 },
     addBtnTexto: { color: '#fff', fontWeight: '600', fontSize: 13 },

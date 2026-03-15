@@ -14,10 +14,12 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
     View, Text, FlatList, TouchableOpacity,
-    StyleSheet, ActivityIndicator, Alert, RefreshControl
+    StyleSheet, ActivityIndicator, Alert, RefreshControl, useWindowDimensions
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
 import { citasService } from '../../services/api';
+import { getResponsive } from '../../utils/responsive';
 
 // Colores por estado de cita
 const colorEstado = {
@@ -45,6 +47,8 @@ const CitaCard = ({ cita }) => {
 };
 
 const ClienteDashboard = ({ navigation }) => {
+    const { width } = useWindowDimensions();
+    const { isMobile } = getResponsive(width);
     const { user, logout } = useAuth();
     const [citas, setCitas] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -71,18 +75,23 @@ const ClienteDashboard = ({ navigation }) => {
     }
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container} edges={['top']}>
             {/* ── Header ─────────────────────────────────────── */}
             <View style={styles.header}>
-                <View>
+                <View style={[styles.headerInfo, isMobile && styles.headerInfoMobile]}>
                     <Text style={styles.bienvenida}>Hola, {user.nombre} 👋</Text>
                     <Text style={styles.subtitulo}>Tus próximas citas</Text>
                 </View>
-                <TouchableOpacity onPress={logout}>
-                    <Text style={styles.logout}>Salir</Text>
-                </TouchableOpacity>
+                <View style={[styles.headerActions, isMobile && styles.headerActionsMobile]}>
+                    <TouchableOpacity onPress={() => navigation.navigate('AjustesCuenta')}>
+                        <Text style={styles.settings}>Ajustes</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={logout}>
+                        <Text style={styles.logout}>Salir</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
-
+ 
             {/* ── Lista de citas ─────────────────────────────── */}
             <FlatList
                 data={citas}
@@ -99,7 +108,7 @@ const ClienteDashboard = ({ navigation }) => {
             <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate('NuevaCita', { onVolver: cargarCitas })}>
                 <Text style={styles.fabTexto}>+ Nueva Cita</Text>
             </TouchableOpacity>
-        </View>
+        </SafeAreaView>
     );
 };
 
@@ -107,10 +116,17 @@ const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#F1F5F9' },
     header: {
         flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-        backgroundColor: '#1E3A5F', padding: 20, paddingTop: 50,
+        backgroundColor: '#1E3A5F', paddingHorizontal: 20, paddingVertical: 16,
+        flexWrap: 'wrap',
+        rowGap: 10,
     },
+    headerInfo: { flexShrink: 1 },
+    headerInfoMobile: { width: '100%' },
+    headerActions: { flexDirection: 'row', gap: 14, alignItems: 'center' },
+    headerActionsMobile: { width: '100%', justifyContent: 'space-between' },
     bienvenida: { fontSize: 20, fontWeight: 'bold', color: '#fff' },
     subtitulo: { color: '#93C5FD', fontSize: 13, marginTop: 2 },
+    settings: { color: '#BFDBFE', fontWeight: '600' },
     logout: { color: '#FCA5A5', fontWeight: '600' },
     card: {
         backgroundColor: '#fff', borderRadius: 12, padding: 16, marginHorizontal: 16,

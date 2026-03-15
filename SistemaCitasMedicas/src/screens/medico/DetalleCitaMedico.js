@@ -12,13 +12,16 @@
 import React, { useState } from 'react';
 import {
     View, Text, TextInput, TouchableOpacity,
-    StyleSheet, Alert, ActivityIndicator, ScrollView
+    StyleSheet, Alert, ActivityIndicator, ScrollView, useWindowDimensions
 } from 'react-native';
 import { citasService } from '../../services/api';
+import { getResponsive } from '../../utils/responsive';
 
 const ESTADOS = ['pendiente', 'confirmada', 'completada', 'cancelada'];
 
 const DetalleCitaMedico = ({ route, navigation }) => {
+    const { width } = useWindowDimensions();
+    const { horizontalPadding, contentMaxWidth } = getResponsive(width);
     const { cita, onVolver } = route.params;
     const [estadoSel, setEstadoSel] = useState(cita.estado);
     const [notas, setNotas] = useState('');
@@ -39,7 +42,8 @@ const DetalleCitaMedico = ({ route, navigation }) => {
     };
 
     return (
-        <ScrollView contentContainerStyle={styles.container}>
+        <ScrollView contentContainerStyle={[styles.container, { paddingHorizontal: horizontalPadding }]}> 
+            <View style={[styles.wrapper, { maxWidth: contentMaxWidth }]}> 
             <TouchableOpacity onPress={() => navigation.goBack()}>
                 <Text style={styles.back}>← Volver</Text>
             </TouchableOpacity>
@@ -93,12 +97,14 @@ const DetalleCitaMedico = ({ route, navigation }) => {
             >
                 {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.botonTexto}>Guardar Cambios</Text>}
             </TouchableOpacity>
+            </View>
         </ScrollView>
     );
 };
 
 const styles = StyleSheet.create({
-    container: { padding: 20, backgroundColor: '#F0FDF4', flexGrow: 1 },
+    container: { paddingVertical: 20, backgroundColor: '#F0FDF4', flexGrow: 1 },
+    wrapper: { width: '100%', alignSelf: 'center' },
     back: { color: '#166534', fontWeight: '600', marginTop: 30, marginBottom: 10 },
     titulo: { fontSize: 22, fontWeight: 'bold', color: '#166534', marginBottom: 20 },
     infoCard: {

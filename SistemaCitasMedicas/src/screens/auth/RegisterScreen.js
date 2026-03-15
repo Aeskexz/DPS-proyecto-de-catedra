@@ -143,7 +143,6 @@ const styles = StyleSheet.create({
         paddingVertical: 14, alignItems: 'center', marginTop: 8, marginBottom: 16,
     },
     botonTexto: { color: '#fff', fontWeight: '700', fontSize: 16 },
-    botonTexto: { color: '#fff', fontWeight: '700', fontSize: 16 },
     link: { textAlign: 'center', color: '#2563EB', fontSize: 14 },
 
     /* ESTILOS PARA ADAPTAR A PANTALLA WEB (LAPTOPS) RESPONSIVE */

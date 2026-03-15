@@ -13,10 +13,12 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
     View, Text, FlatList, TouchableOpacity,
-    StyleSheet, ActivityIndicator, Alert, RefreshControl
+    StyleSheet, ActivityIndicator, Alert, RefreshControl, useWindowDimensions
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
 import { citasService } from '../../services/api';
+import { getResponsive } from '../../utils/responsive';
 
 const colorEstado = {
     pendiente: { bg: '#FEF9C3', text: '#854D0E' },
@@ -26,6 +28,8 @@ const colorEstado = {
 };
 
 const MedicoDashboard = ({ navigation }) => {
+    const { width } = useWindowDimensions();
+    const { isMobile } = getResponsive(width);
     const { user, logout } = useAuth();
     const [citas, setCitas] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -70,15 +74,20 @@ const MedicoDashboard = ({ navigation }) => {
     };
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container} edges={['top']}>
             <View style={styles.header}>
-                <View>
+                <View style={[styles.headerInfo, isMobile && styles.headerInfoMobile]}>
                     <Text style={styles.titulo}>Dr. {user.nombre} {user.apellido}</Text>
                     <Text style={styles.subtitulo}>{citas.length} cita(s) activas</Text>
                 </View>
-                <TouchableOpacity onPress={logout}>
-                    <Text style={styles.logout}>Salir</Text>
-                </TouchableOpacity>
+                <View style={[styles.headerActions, isMobile && styles.headerActionsMobile]}>
+                    <TouchableOpacity onPress={() => navigation.navigate('AjustesCuenta')}>
+                        <Text style={styles.settings}>Ajustes</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={logout}>
+                        <Text style={styles.logout}>Salir</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
 
             <FlatList
@@ -89,7 +98,7 @@ const MedicoDashboard = ({ navigation }) => {
                 ListEmptyComponent={<Text style={styles.vacio}>No tienes citas asignadas actualmente.</Text>}
                 contentContainerStyle={{ paddingBottom: 32 }}
             />
-        </View>
+        </SafeAreaView>
     );
 };
 
@@ -97,10 +106,17 @@ const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#F0FDF4' },
     header: {
         flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-        backgroundColor: '#166534', padding: 20, paddingTop: 50,
+        backgroundColor: '#166534', paddingHorizontal: 20, paddingVertical: 16,
+        flexWrap: 'wrap',
+        rowGap: 10,
     },
+    headerInfo: { flexShrink: 1 },
+    headerInfoMobile: { width: '100%' },
+    headerActions: { flexDirection: 'row', gap: 14, alignItems: 'center' },
+    headerActionsMobile: { width: '100%', justifyContent: 'space-between' },
     titulo: { fontSize: 18, fontWeight: 'bold', color: '#fff' },
     subtitulo: { color: '#86EFAC', fontSize: 13, marginTop: 2 },
+    settings: { color: '#BBF7D0', fontWeight: '600' },
     logout: { color: '#FCA5A5', fontWeight: '600' },
     card: {
         backgroundColor: '#fff', borderRadius: 12, padding: 16, marginHorizontal: 16,

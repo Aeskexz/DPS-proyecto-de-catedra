@@ -8,9 +8,10 @@
 import React, { useEffect, useState } from 'react';
 import {
     View, Text, TextInput, TouchableOpacity, StyleSheet,
-    ScrollView, Alert, ActivityIndicator, KeyboardAvoidingView, Platform
+    ScrollView, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, useWindowDimensions
 } from 'react-native';
 import { medicosService, especialidadesService } from '../../services/api';
+import { getResponsive } from '../../utils/responsive';
 
 const Campo = ({ label, campo, placeholder, secureTextEntry, keyboardType, valor, onChange }) => (
     <>
@@ -28,6 +29,8 @@ const Campo = ({ label, campo, placeholder, secureTextEntry, keyboardType, valor
 );
 
 const RegistrarMedico = ({ navigation, route }) => {
+    const { width } = useWindowDimensions();
+    const { horizontalPadding, contentMaxWidth } = getResponsive(width);
     const [form, setForm] = useState({
         nombre: '', apellido: '', email: '', username: '',
         password: '', telefono: '', numero_colegiado: '', id_especialidad: '',
@@ -77,7 +80,8 @@ const RegistrarMedico = ({ navigation, route }) => {
 
     return (
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-            <ScrollView contentContainerStyle={styles.container}>
+            <ScrollView contentContainerStyle={[styles.container, { paddingHorizontal: horizontalPadding }]}> 
+                <View style={[styles.wrapper, { maxWidth: contentMaxWidth }]}> 
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                     <Text style={styles.back}>← Volver</Text>
                 </TouchableOpacity>
@@ -118,13 +122,15 @@ const RegistrarMedico = ({ navigation, route }) => {
                 >
                     {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.botonTexto}>Registrar Médico</Text>}
                 </TouchableOpacity>
+                </View>
             </ScrollView>
         </KeyboardAvoidingView>
     );
 };
 
 const styles = StyleSheet.create({
-    container: { padding: 20, backgroundColor: '#FAF5FF', flexGrow: 1 },
+    container: { paddingVertical: 20, backgroundColor: '#FAF5FF', flexGrow: 1 },
+    wrapper: { width: '100%', alignSelf: 'center' },
     back: { color: '#7C3AED', fontWeight: '600', marginTop: 30, marginBottom: 8 },
     titulo: { fontSize: 22, fontWeight: 'bold', color: '#4C1D95', marginBottom: 20 },
     label: { fontSize: 13, fontWeight: '600', color: '#334155', marginBottom: 4, marginTop: 10 },

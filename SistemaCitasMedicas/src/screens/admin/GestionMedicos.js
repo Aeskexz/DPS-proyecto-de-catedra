@@ -12,11 +12,15 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
     View, Text, FlatList, TouchableOpacity,
-    StyleSheet, ActivityIndicator, Alert, RefreshControl
+    StyleSheet, ActivityIndicator, Alert, RefreshControl, useWindowDimensions
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { medicosService } from '../../services/api';
+import { getResponsive } from '../../utils/responsive';
 
 const GestionMedicos = ({ navigation, route }) => {
+    const { width } = useWindowDimensions();
+    const { horizontalPadding, contentMaxWidth, isMobile } = getResponsive(width);
     const [medicos, setMedicos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -50,7 +54,7 @@ const GestionMedicos = ({ navigation, route }) => {
     if (loading) return <ActivityIndicator style={{ flex: 1 }} size="large" color="#7C3AED" />;
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container} edges={['top']}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                     <Text style={styles.back}>← Volver</Text>
@@ -64,9 +68,10 @@ const GestionMedicos = ({ navigation, route }) => {
             <FlatList
                 data={medicos}
                 keyExtractor={(item) => String(item.id_medico)}
+                contentContainerStyle={{ paddingHorizontal: horizontalPadding, paddingBottom: 32 }}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); cargar(); }} />}
                 renderItem={({ item }) => (
-                    <View style={styles.card}>
+                    <View style={[styles.card, { maxWidth: contentMaxWidth, alignSelf: 'center' }]}>
                         <Text style={styles.nombre}>{item.nombre_completo}</Text>
                         <Text style={styles.esp}>{item.especialidad}</Text>
                         <Text style={styles.info}>{item.email}</Text>
@@ -81,9 +86,8 @@ const GestionMedicos = ({ navigation, route }) => {
                     </View>
                 )}
                 ListEmptyComponent={<Text style={styles.vacio}>No hay médicos registrados.</Text>}
-                contentContainerStyle={{ paddingBottom: 32 }}
             />
-        </View>
+        </SafeAreaView>
     );
 };
 
@@ -91,7 +95,9 @@ const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#FAF5FF' },
     header: {
         flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-        backgroundColor: '#4C1D95', padding: 20, paddingTop: 50,
+        backgroundColor: '#4C1D95', paddingHorizontal: 20, paddingVertical: 16,
+        flexWrap: 'wrap',
+        rowGap: 10,
     },
     back: { color: '#C4B5FD', fontWeight: '600' },
     titulo: { fontSize: 18, fontWeight: 'bold', color: '#fff' },

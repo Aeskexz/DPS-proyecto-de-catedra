@@ -59,6 +59,27 @@ export const AuthProvider = ({ children }) => {
     };
 
     /**
+     * updateMiCuenta — actualiza perfil o contraseña y sincroniza user local.
+     */
+    const updateMiCuenta = async (datos) => {
+        const response = await authService.updateMiCuenta(datos);
+        if (response?.user) {
+            await AsyncStorage.setItem('user', JSON.stringify(response.user));
+            setUser(response.user);
+        }
+        return response;
+    };
+
+    /**
+     * eliminarMiCuenta — elimina la cuenta actual y cierra sesión local.
+     */
+    const eliminarMiCuenta = async (password) => {
+        const response = await authService.eliminarMiCuenta(password);
+        await logout();
+        return response;
+    };
+
+    /**
      * logout — limpia el estado y AsyncStorage.
      */
     const logout = async () => {
@@ -79,7 +100,7 @@ export const AuthProvider = ({ children }) => {
     const isRole = (rol) => user?.rol === rol;
 
     return (
-        <AuthContext.Provider value={{ user, token, loading, login, logout, isRole }}>
+        <AuthContext.Provider value={{ user, token, loading, login, logout, updateMiCuenta, eliminarMiCuenta, isRole }}>
             {children}
         </AuthContext.Provider>
     );

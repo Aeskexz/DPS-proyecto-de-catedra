@@ -34,6 +34,7 @@ import DetalleCitaMedico from '../screens/medico/DetalleCitaMedico';
 import AdminDashboard from '../screens/admin/AdminDashboard';
 import GestionMedicos from '../screens/admin/GestionMedicos';
 import RegistrarMedico from '../screens/admin/RegistrarMedico';
+import AjustesCuentaScreen from '../screens/common/AjustesCuentaScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -63,12 +64,14 @@ const AppNavigator = () => {
                     <>
                         <Stack.Screen name="ClienteDashboard" component={ClienteDashboard} />
                         <Stack.Screen name="NuevaCita" component={NuevaCitaScreen} />
+                        <Stack.Screen name="AjustesCuenta" component={AjustesCuentaScreen} />
                     </>
                 ) : user.rol === 'medico' ? (
                     // ── Rol: médico ───────────────────────────────────
                     <>
                         <Stack.Screen name="MedicoDashboard" component={MedicoDashboard} />
                         <Stack.Screen name="DetalleCitaMedico" component={DetalleCitaMedico} />
+                        <Stack.Screen name="AjustesCuenta" component={AjustesCuentaScreen} />
                     </>
                 ) : user.rol === 'administrador' ? (
                     // ── Rol: administrador ────────────────────────────
@@ -76,6 +79,7 @@ const AppNavigator = () => {
                         <Stack.Screen name="AdminDashboard" component={AdminDashboard} />
                         <Stack.Screen name="GestionMedicos" component={GestionMedicos} />
                         <Stack.Screen name="RegistrarMedico" component={RegistrarMedico} />
+                        <Stack.Screen name="AjustesCuenta" component={AjustesCuentaScreen} />
                     </>
                 ) : (
                     // ── Rol Desconocido Fallback ───────────────────────

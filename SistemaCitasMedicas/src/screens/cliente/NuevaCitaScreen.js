@@ -14,11 +14,14 @@
 import React, { useEffect, useState } from 'react';
 import {
     View, Text, TextInput, TouchableOpacity, StyleSheet,
-    ScrollView, Alert, ActivityIndicator
+    ScrollView, Alert, ActivityIndicator, useWindowDimensions
 } from 'react-native';
 import { medicosService, citasService } from '../../services/api';
+import { getResponsive } from '../../utils/responsive';
 
 const NuevaCitaScreen = ({ navigation, route }) => {
+    const { width } = useWindowDimensions();
+    const { horizontalPadding, contentMaxWidth } = getResponsive(width);
     const [medicos, setMedicos] = useState([]);
     const [medicoSeleccionado, setMedicoSeleccionado] = useState(null);
     const [fecha, setFecha] = useState('');
@@ -81,7 +84,8 @@ const NuevaCitaScreen = ({ navigation, route }) => {
     }
 
     return (
-        <ScrollView contentContainerStyle={styles.container}>
+        <ScrollView contentContainerStyle={[styles.container, { paddingHorizontal: horizontalPadding }]}> 
+            <View style={[styles.wrapper, { maxWidth: contentMaxWidth }]}> 
             {/* ── Header ─────────────────────────────────── */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -143,12 +147,14 @@ const NuevaCitaScreen = ({ navigation, route }) => {
             >
                 {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.botonTexto}>Confirmar Cita</Text>}
             </TouchableOpacity>
+            </View>
         </ScrollView>
     );
 };
 
 const styles = StyleSheet.create({
-    container: { padding: 20, backgroundColor: '#F1F5F9', flexGrow: 1 },
+    container: { paddingVertical: 20, backgroundColor: '#F1F5F9', flexGrow: 1 },
+    wrapper: { width: '100%', alignSelf: 'center' },
     header: { flexDirection: 'row', alignItems: 'center', marginBottom: 20, marginTop: 30 },
     back: { color: '#2563EB', fontWeight: '600', marginRight: 16 },
     titulo: { fontSize: 22, fontWeight: 'bold', color: '#1E3A5F' },

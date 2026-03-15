@@ -11,10 +11,32 @@
 
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
+import Constants from 'expo-constants';
 
-// Usa la IP absoluta de tu red local en lugar de 10.0.2.2 o localhost
-// Esto garantiza que el emulador o celular físico pueda ver tu computadora.
-const BASE_URL = 'http://192.168.0.7:3001/api';
+const getExpoHostIp = () => {
+    const hostUri = Constants.expoConfig?.hostUri || '';
+    const host = hostUri.split(':')[0];
+    return host || null;
+};
+
+const resolveBaseUrl = () => {
+    const envUrl = process.env.EXPO_PUBLIC_API_URL;
+    if (envUrl) return envUrl;
+
+    const expoHostIp = getExpoHostIp();
+    if (expoHostIp) {
+        return `http://${expoHostIp}:3001/api`;
+    }
+
+    if (Platform.OS === 'android') {
+        return 'http://10.0.2.2:3001/api';
+    }
+
+    return 'http://localhost:3001/api';
+};
+
+const BASE_URL = resolveBaseUrl();
 
 const api = axios.create({
     baseURL: BASE_URL,
@@ -44,6 +66,8 @@ api.interceptors.response.use(
 export const authService = {
     login: (username, password) => api.post('/auth/login', { username, password }),
     register: (datos) => api.post('/auth/register', datos),
+    updateMiCuenta: (datos) => api.put('/auth/me', datos),
+    eliminarMiCuenta: (password) => api.delete('/auth/me', { data: { password } }),
 };
 
 // ── Servicios de Citas ────────────────────────────────────
