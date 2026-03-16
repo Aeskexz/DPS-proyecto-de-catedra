@@ -1,16 +1,3 @@
-// ============================================================
-// src/screens/cliente/NuevaCitaScreen.js
-// ============================================================
-// RESPONSABLE: Equipo Frontend
-// ESTADO: Completo. Permite al cliente elegir médico, fecha, hora y motivo.
-//
-// TODO PARA TUS COMPAÑEROS:
-//   - Reemplazar el TextInput de fecha con un DatePicker nativo
-//   - Mostrar solo horarios disponibles del médico seleccionado
-//     (requiere GET /api/medicos/:id/slots?fecha=YYYY-MM-DD)
-//   - Agregar un Picker/Dropdown para la hora en vez de texto libre
-// ============================================================
-
 import React, { useEffect, useState } from 'react';
 import {
     View, Text, TextInput, TouchableOpacity, StyleSheet,
@@ -30,7 +17,6 @@ const NuevaCitaScreen = ({ navigation, route }) => {
     const [loading, setLoading] = useState(false);
     const [cargandoMedicos, setCargandoMedicos] = useState(true);
 
-    // Cargar lista de médicos al montar
     useEffect(() => {
         medicosService.getLista()
             .then(setMedicos)
@@ -43,12 +29,10 @@ const NuevaCitaScreen = ({ navigation, route }) => {
             Alert.alert('Campos requeridos', 'Selecciona médico, fecha y hora.');
             return;
         }
-        // Validación simple de formato fecha (YYYY-MM-DD)
         if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) {
             Alert.alert('Fecha inválida', 'Usa el formato YYYY-MM-DD (ej: 2025-06-15).');
             return;
         }
-        // Validación simple de formato hora (HH:MM)
         if (!/^\d{2}:\d{2}$/.test(hora)) {
             Alert.alert('Hora inválida', 'Usa el formato HH:MM (ej: 09:30).');
             return;
@@ -65,7 +49,7 @@ const NuevaCitaScreen = ({ navigation, route }) => {
 
             Alert.alert('¡Cita creada!', 'Tu cita fue registrada exitosamente.', [
                 {
-                    text: 'Volver',
+                    text: 'Entendido',
                     onPress: () => {
                         if (route.params?.onVolver) route.params.onVolver();
                         navigation.goBack();
@@ -80,72 +64,107 @@ const NuevaCitaScreen = ({ navigation, route }) => {
     };
 
     if (cargandoMedicos) {
-        return <ActivityIndicator style={{ flex: 1 }} size="large" color="#2563EB" />;
+        return (
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#2563EB" />
+            </View>
+        );
     }
 
     return (
-        <ScrollView contentContainerStyle={[styles.container, { paddingHorizontal: horizontalPadding }]}> 
+        <ScrollView style={styles.main} contentContainerStyle={[styles.container, { paddingHorizontal: horizontalPadding }]}> 
             <View style={[styles.wrapper, { maxWidth: contentMaxWidth }]}> 
-            {/*  Header  */}
+            
+            {/* Header Modernizado */}
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <Text style={styles.back}>← Volver</Text>
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+                    <Text style={styles.backText}>←</Text>
                 </TouchableOpacity>
-                <Text style={styles.titulo}>Nueva Cita</Text>
+                <View>
+                    <Text style={styles.titulo}>Agendar Cita</Text>
+                    <Text style={styles.subtitulo}>Completa los datos del formulario</Text>
+                </View>
             </View>
 
-            {/*  Selección de Médico  */}
-            <Text style={styles.seccionTitulo}>Selecciona un médico</Text>
-            {medicos.map((m) => (
-                <TouchableOpacity
-                    key={m.id_medico}
-                    style={[styles.medicoCard, medicoSeleccionado?.id_medico === m.id_medico && styles.medicoSeleccionado]}
-                    onPress={() => setMedicoSeleccionado(m)}
-                >
-                    <Text style={styles.medicoNombre}>{m.nombre_completo}</Text>
-                    <Text style={styles.medicoEsp}>{m.especialidad}</Text>
-                </TouchableOpacity>
-            ))}
+            {/* Selección de Médico */}
+            <Text style={styles.seccionTitulo}>1. Elige tu especialista</Text>
+            <View style={styles.medicoList}>
+                {medicos.map((m) => (
+                    <TouchableOpacity
+                        key={m.id_medico}
+                        activeOpacity={0.7}
+                        style={[styles.medicoCard, medicoSeleccionado?.id_medico === m.id_medico && styles.medicoSeleccionado]}
+                        onPress={() => setMedicoSeleccionado(m)}
+                    >
+                        <View style={styles.medicoInfo}>
+                            <Text style={[styles.medicoNombre, medicoSeleccionado?.id_medico === m.id_medico && styles.textoBlanco]}>
+                                {m.nombre_completo}
+                            </Text>
+                            <Text style={[styles.medicoEsp, medicoSeleccionado?.id_medico === m.id_medico && styles.textoAzulClaro]}>
+                                {m.especialidad}
+                            </Text>
+                        </View>
+                        {medicoSeleccionado?.id_medico === m.id_medico && (
+                            <View style={styles.checkCircle}>
+                                <Text style={styles.checkText}>✓</Text>
+                            </View>
+                        )}
+                    </TouchableOpacity>
+                ))}
+            </View>
 
-            {/*  Fecha  */}
-            <Text style={styles.label}>Fecha de la cita (YYYY-MM-DD)</Text>
-            {/* TODO (compañeros): reemplazar con DatePicker  */}
-            <TextInput
-                style={styles.input}
-                placeholder="Ej: 2025-06-15"
-                value={fecha}
-                onChangeText={setFecha}
-                keyboardType="numeric"
-            />
+            {/* Formulario */}
+            <View style={styles.formCard}>
+                <Text style={styles.seccionTitulo}>2. Detalles de la cita</Text>
+                
+                <View style={styles.inputGroup}>
+                    <Text style={styles.label}>Fecha (Año-Mes-Día)</Text>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Ej: 2025-06-15"
+                        placeholderTextColor="#94A3B8"
+                        value={fecha}
+                        onChangeText={setFecha}
+                        keyboardType="numeric"
+                    />
+                </View>
 
-            {/*  Hora  */}
-            <Text style={styles.label}>Hora (HH:MM)</Text>
-            {/* TODO (compañeros): reemplazar con TimePicker o slots disponibles */}
-            <TextInput
-                style={styles.input}
-                placeholder="Ej: 09:30"
-                value={hora}
-                onChangeText={setHora}
-                keyboardType="numeric"
-            />
+                <View style={styles.inputGroup}>
+                    <Text style={styles.label}>Hora (Formato 24h)</Text>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Ej: 14:30"
+                        placeholderTextColor="#94A3B8"
+                        value={hora}
+                        onChangeText={setHora}
+                        keyboardType="numeric"
+                    />
+                </View>
 
-            {/*  Motivo  */}
-            <Text style={styles.label}>Motivo de consulta (opcional)</Text>
-            <TextInput
-                style={[styles.input, { height: 80, textAlignVertical: 'top' }]}
-                placeholder="Describe brevemente tu motivo..."
-                multiline
-                value={motivo}
-                onChangeText={setMotivo}
-            />
+                <View style={styles.inputGroup}>
+                    <Text style={styles.label}>Motivo de consulta</Text>
+                    <TextInput
+                        style={[styles.input, styles.textArea]}
+                        placeholder="Describe el síntoma o razón..."
+                        placeholderTextColor="#94A3B8"
+                        multiline
+                        numberOfLines={4}
+                        value={motivo}
+                        onChangeText={setMotivo}
+                    />
+                </View>
+            </View>
 
-            {/*  Botón  */}
             <TouchableOpacity
-                style={[styles.boton, loading && { opacity: 0.6 }]}
+                style={[styles.boton, (loading || !medicoSeleccionado) && styles.botonDisabled]}
                 onPress={handleCrearCita}
-                disabled={loading}
+                disabled={loading || !medicoSeleccionado}
             >
-                {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.botonTexto}>Confirmar Cita</Text>}
+                {loading ? (
+                    <ActivityIndicator color="#fff" />
+                ) : (
+                    <Text style={styles.botonTexto}>Confirmar Reservación</Text>
+                )}
             </TouchableOpacity>
             </View>
         </ScrollView>
@@ -153,29 +172,62 @@ const NuevaCitaScreen = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
-    container: { paddingVertical: 20, backgroundColor: '#F1F5F9', flexGrow: 1 },
+    main: { backgroundColor: '#F8FAFC' },
+    container: { paddingVertical: 20, flexGrow: 1 },
     wrapper: { width: '100%', alignSelf: 'center' },
-    header: { flexDirection: 'row', alignItems: 'center', marginBottom: 20, marginTop: 30 },
-    back: { color: '#2563EB', fontWeight: '600', marginRight: 16 },
-    titulo: { fontSize: 22, fontWeight: 'bold', color: '#1E3A5F' },
-    seccionTitulo: { fontSize: 15, fontWeight: '700', color: '#334155', marginBottom: 10 },
+    loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    
+    // Header
+    header: { flexDirection: 'row', alignItems: 'center', marginBottom: 25, marginTop: 20 },
+    backBtn: { 
+        width: 45, height: 45, borderRadius: 12, backgroundColor: '#fff', 
+        justifyContent: 'center', alignItems: 'center', marginRight: 15,
+        elevation: 2, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 4
+    },
+    backText: { color: '#1E3A5F', fontSize: 24, fontWeight: 'bold' },
+    titulo: { fontSize: 24, fontWeight: '800', color: '#1E3A5F' },
+    subtitulo: { fontSize: 14, color: '#64748B' },
+
+    seccionTitulo: { fontSize: 16, fontWeight: '700', color: '#1E3A5F', marginBottom: 15 },
+
+    // Médicos
+    medicoList: { marginBottom: 10 },
     medicoCard: {
-        backgroundColor: '#fff', borderRadius: 12, padding: 14, marginBottom: 10,
-        borderWidth: 2, borderColor: 'transparent', elevation: 1,
+        backgroundColor: '#fff', borderRadius: 16, padding: 16, marginBottom: 12,
+        flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+        borderWidth: 1, borderColor: '#E2E8F0',
     },
-    medicoSeleccionado: { borderColor: '#2563EB', backgroundColor: '#EFF6FF' },
-    medicoNombre: { fontWeight: '700', color: '#1E3A5F', fontSize: 15 },
-    medicoEsp: { color: '#64748B', fontSize: 13 },
-    label: { fontSize: 14, fontWeight: '600', color: '#334155', marginTop: 14, marginBottom: 6 },
+    medicoSeleccionado: { 
+        backgroundColor: '#1E3A5F', 
+        borderColor: '#1E3A5F',
+        elevation: 4,
+    },
+    medicoInfo: { flex: 1 },
+    medicoNombre: { fontWeight: '700', color: '#1E3A5F', fontSize: 16 },
+    medicoEsp: { color: '#64748B', fontSize: 13, marginTop: 2 },
+    textoBlanco: { color: '#fff' },
+    textoAzulClaro: { color: '#93C5FD' },
+    checkCircle: { width: 24, height: 24, borderRadius: 12, backgroundColor: '#2563EB', justifyContent: 'center', alignItems: 'center' },
+    checkText: { color: '#fff', fontWeight: 'bold', fontSize: 14 },
+
+    // Formulario
+    formCard: { backgroundColor: '#fff', borderRadius: 20, padding: 20, marginBottom: 20, elevation: 2 },
+    inputGroup: { marginBottom: 18 },
+    label: { fontSize: 13, fontWeight: '700', color: '#475569', marginBottom: 8, textTransform: 'uppercase' },
     input: {
-        borderWidth: 1, borderColor: '#CBD5E1', borderRadius: 10,
-        paddingHorizontal: 14, paddingVertical: 10, fontSize: 15, backgroundColor: '#fff',
+        borderWidth: 1.5, borderColor: '#F1F5F9', borderRadius: 12,
+        paddingHorizontal: 16, paddingVertical: 12, fontSize: 15, backgroundColor: '#F8FAFC', color: '#1E293B'
     },
+    textArea: { height: 100, textAlignVertical: 'top' },
+
+    // Botón
     boton: {
-        backgroundColor: '#2563EB', borderRadius: 12,
-        paddingVertical: 16, alignItems: 'center', marginTop: 24, marginBottom: 40,
+        backgroundColor: '#2563EB', borderRadius: 16,
+        paddingVertical: 18, alignItems: 'center', marginTop: 10, marginBottom: 40,
+        elevation: 5, shadowColor: '#2563EB', shadowOpacity: 0.3, shadowRadius: 8
     },
-    botonTexto: { color: '#fff', fontWeight: '700', fontSize: 16 },
+    botonDisabled: { backgroundColor: '#94A3B8', elevation: 0 },
+    botonTexto: { color: '#fff', fontWeight: '800', fontSize: 16 },
 });
 
 export default NuevaCitaScreen;

@@ -1,16 +1,3 @@
-// ============================================================
-// src/screens/cliente/ClienteDashboard.js
-// ============================================================
-// RESPONSABLE: Equipo Frontend
-// ESTADO: Completo. Muestra las citas del paciente y botón para crear una nueva.
-//
-// TODO PARA TUS COMPAÑEROS:
-//   - Agregar pull-to-refresh para recargar las citas
-//   - Agregar filtro de citas por estado (pendiente, confirmada, etc.)
-//   - Mostrar imagen/icono de médico en cada tarjeta de cita
-//   - Implementar cancelar cita (requiere endpoint PUT /api/citas/:id/estado)
-// ============================================================
-
 import React, { useEffect, useState, useCallback } from 'react';
 import {
     View, Text, FlatList, TouchableOpacity,
@@ -21,7 +8,7 @@ import { useAuth } from '../../context/AuthContext';
 import { citasService } from '../../services/api';
 import { getResponsive } from '../../utils/responsive';
 
-// Colores por estado de cita
+// Mantenemos tus colores originales para evitar conflictos
 const colorEstado = {
     pendiente: { bg: '#FEF9C3', text: '#854D0E' },
     confirmada: { bg: '#DCFCE7', text: '#166534' },
@@ -34,14 +21,28 @@ const CitaCard = ({ cita }) => {
     return (
         <View style={styles.card}>
             <View style={styles.cardHeader}>
-                <Text style={styles.cardMedico}>{cita.nombre_medico}</Text>
+                <View style={{ flex: 1 }}>
+                    <Text style={styles.cardMedico}>{cita.nombre_medico}</Text>
+                    <Text style={styles.cardEspecialidad}>{cita.especialidad}</Text>
+                </View>
                 <View style={[styles.badge, { backgroundColor: color.bg }]}>
                     <Text style={[styles.badgeText, { color: color.text }]}>{cita.estado.toUpperCase()}</Text>
                 </View>
             </View>
-            <Text style={styles.cardEspecialidad}>{cita.especialidad}</Text>
-            <Text style={styles.cardFecha}> {cita.fecha_cita}   {cita.hora_cita?.slice(0, 5)}</Text>
-            {cita.motivo_consulta ? <Text style={styles.cardMotivo}>Motivo: {cita.motivo_consulta}</Text> : null}
+            
+            <View style={styles.divider} />
+            
+            <View style={styles.cardBody}>
+                <Text style={styles.cardFechaLabel}>Fecha y Hora:</Text>
+                <Text style={styles.cardFechaValue}>{cita.fecha_cita}  •  {cita.hora_cita?.slice(0, 5)}</Text>
+                
+                {cita.motivo_consulta ? (
+                    <View style={styles.motivoContainer}>
+                        <Text style={styles.cardMotivoLabel}>Motivo:</Text>
+                        <Text style={styles.cardMotivoText}>{cita.motivo_consulta}</Text>
+                    </View>
+                ) : null}
+            </View>
         </View>
     );
 };
@@ -71,41 +72,53 @@ const ClienteDashboard = ({ navigation }) => {
     const onRefresh = () => { setRefreshing(true); cargarCitas(); };
 
     if (loading) {
-        return <ActivityIndicator style={{ flex: 1 }} size="large" color="#2563EB" />;
+        return (
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#2563EB" />
+                <Text style={{ marginTop: 10, color: '#64748B' }}>Cargando tus citas...</Text>
+            </View>
+        );
     }
 
     return (
         <SafeAreaView style={styles.container} edges={['top']}>
-            {/*  Header  */}
+            {/* Header mejorado visualmente */}
             <View style={styles.header}>
-                <View style={[styles.headerInfo, isMobile && styles.headerInfoMobile]}>
-                    <Text style={styles.bienvenida}>Hola, {user.nombre} </Text>
-                    <Text style={styles.subtitulo}>Tus próximas citas</Text>
-                </View>
-                <View style={[styles.headerActions, isMobile && styles.headerActionsMobile]}>
-                    <TouchableOpacity onPress={() => navigation.navigate('AjustesCuenta')}>
-                        <Text style={styles.settings}>Ajustes</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={logout}>
-                        <Text style={styles.logout}>Salir</Text>
-                    </TouchableOpacity>
+                <View style={[styles.headerTop, isMobile && styles.headerTopMobile]}>
+                    <View>
+                        <Text style={styles.bienvenida}>Hola, {user.nombre}</Text>
+                        <Text style={styles.subtitulo}>Gestiona tus citas médicas</Text>
+                    </View>
+                    <View style={styles.headerActions}>
+                        <TouchableOpacity onPress={() => navigation.navigate('AjustesCuenta')} style={styles.actionBtn}>
+                            <Text style={styles.settingsText}>Ajustes</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={logout} style={[styles.actionBtn, styles.logoutBtn]}>
+                            <Text style={styles.logoutText}>Salir</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </View>
- 
-            {/*  Lista de citas  */}
+
             <FlatList
                 data={citas}
                 keyExtractor={(item) => String(item.id_cita)}
                 renderItem={({ item }) => <CitaCard cita={item} />}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#2563EB" />}
                 ListEmptyComponent={
-                    <Text style={styles.vacio}>No tienes citas registradas.</Text>
+                    <View style={styles.vacioContainer}>
+                        <Text style={styles.vacio}>No tienes citas registradas.</Text>
+                    </View>
                 }
-                contentContainerStyle={{ paddingBottom: 100 }}
+                contentContainerStyle={{ paddingBottom: 120, paddingTop: 10 }}
             />
 
-            {/*  FAB: Nueva cita  */}
-            <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate('NuevaCita', { onVolver: cargarCitas })}>
+            {/* Botón Flotante (FAB) más moderno */}
+            <TouchableOpacity 
+                style={styles.fab} 
+                onPress={() => navigation.navigate('NuevaCita', { onVolver: cargarCitas })}
+                activeOpacity={0.8}
+            >
                 <Text style={styles.fabTexto}>+ Nueva Cita</Text>
             </TouchableOpacity>
         </SafeAreaView>
@@ -113,39 +126,83 @@ const ClienteDashboard = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#F1F5F9' },
+    container: { flex: 1, backgroundColor: '#F8FAFC' },
+    loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F8FAFC' },
+    
+    // Header
     header: {
-        flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-        backgroundColor: '#1E3A5F', paddingHorizontal: 20, paddingVertical: 16,
-        flexWrap: 'wrap',
-        rowGap: 10,
+        backgroundColor: '#1E3A5F', // Tu color original
+        paddingHorizontal: 20,
+        paddingBottom: 25,
+        paddingTop: 10,
+        borderBottomLeftRadius: 24,
+        borderBottomRightRadius: 24,
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
     },
-    headerInfo: { flexShrink: 1 },
-    headerInfoMobile: { width: '100%' },
-    headerActions: { flexDirection: 'row', gap: 14, alignItems: 'center' },
-    headerActionsMobile: { width: '100%', justifyContent: 'space-between' },
-    bienvenida: { fontSize: 20, fontWeight: 'bold', color: '#fff' },
-    subtitulo: { color: '#93C5FD', fontSize: 13, marginTop: 2 },
-    settings: { color: '#BFDBFE', fontWeight: '600' },
-    logout: { color: '#FCA5A5', fontWeight: '600' },
+    headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    headerTopMobile: { flexDirection: 'column', alignItems: 'flex-start', gap: 15 },
+    headerActions: { flexDirection: 'row', gap: 10 },
+    bienvenida: { fontSize: 24, fontWeight: '800', color: '#fff' },
+    subtitulo: { color: '#93C5FD', fontSize: 14 },
+    actionBtn: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, backgroundColor: 'rgba(255,255,255,0.1)' },
+    logoutBtn: { backgroundColor: 'rgba(252,165,165,0.2)' },
+    settingsText: { color: '#BFDBFE', fontWeight: '700', fontSize: 13 },
+    logoutText: { color: '#FCA5A5', fontWeight: '700', fontSize: 13 },
+
+    // Tarjetas
     card: {
-        backgroundColor: '#fff', borderRadius: 12, padding: 16, marginHorizontal: 16,
-        marginTop: 12, elevation: 2, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 4,
+        backgroundColor: '#fff',
+        borderRadius: 16,
+        marginHorizontal: 16,
+        marginBottom: 16,
+        padding: 16,
+        elevation: 3,
+        shadowColor: '#000',
+        shadowOpacity: 0.08,
+        shadowRadius: 6,
+        shadowOffset: { width: 0, height: 2 },
     },
-    cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
-    cardMedico: { fontWeight: '700', fontSize: 16, color: '#1E3A5F', flex: 1 },
-    badge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 20 },
-    badgeText: { fontSize: 11, fontWeight: '700' },
-    cardEspecialidad: { color: '#64748B', fontSize: 13, marginBottom: 6 },
-    cardFecha: { color: '#374151', fontSize: 14, marginBottom: 4 },
-    cardMotivo: { color: '#6B7280', fontSize: 13, fontStyle: 'italic' },
-    vacio: { textAlign: 'center', color: '#94A3B8', marginTop: 60, fontSize: 16 },
+    cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+    cardMedico: { fontWeight: '800', fontSize: 17, color: '#1E3A5F' },
+    cardEspecialidad: { color: '#64748B', fontSize: 14, marginTop: 2, fontWeight: '500' },
+    badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
+    badgeText: { fontSize: 10, fontWeight: '800' },
+    
+    divider: { height: 1, backgroundColor: '#F1F5F9', marginVertical: 12 },
+    
+    cardBody: { gap: 8 },
+    cardFechaLabel: { fontSize: 11, color: '#94A3B8', fontWeight: '700', textTransform: 'uppercase' },
+    cardFechaValue: { fontSize: 15, color: '#334155', fontWeight: '600' },
+    
+    motivoContainer: { marginTop: 4 },
+    cardMotivoLabel: { fontSize: 11, color: '#94A3B8', fontWeight: '700', textTransform: 'uppercase' },
+    cardMotivoText: { color: '#475569', fontSize: 13, fontStyle: 'italic', marginTop: 2 },
+
+    vacioContainer: { alignItems: 'center', marginTop: 80 },
+    vacio: { color: '#94A3B8', fontSize: 16, fontWeight: '500' },
+
+    // Botón Flotante
     fab: {
-        position: 'absolute', bottom: 28, right: 24, left: 24,
-        backgroundColor: '#2563EB', borderRadius: 14, paddingVertical: 16, alignItems: 'center',
-        elevation: 6,
+        position: 'absolute',
+        bottom: 30,
+        right: 20,
+        left: 20, // Lo mantenemos ancho como el original pero con mejor estilo
+        backgroundColor: '#2563EB', // Tu color original
+        borderRadius: 16,
+        paddingVertical: 18,
+        alignItems: 'center',
+        justifyContent: 'center',
+        elevation: 8,
+        shadowColor: '#2563EB',
+        shadowOpacity: 0.3,
+        shadowRadius: 10,
+        shadowOffset: { width: 0, height: 4 },
     },
-    fabTexto: { color: '#fff', fontWeight: '700', fontSize: 16 },
+    fabTexto: { color: '#fff', fontWeight: '800', fontSize: 16, letterSpacing: 0.5 },
 });
 
 export default ClienteDashboard;
