@@ -13,15 +13,15 @@ router.post('/login', async (req, res) => {
     }
 
     try {
-        const [rows] = await pool.query(
-            `SELECT u.id_usuario, u.nombre, u.apellido, u.email,
-              u.username, u.password_hash, u.activo,
-              r.id_rol, r.nombre_rol
-       FROM usuarios u
-       JOIN roles r ON r.id_rol = u.id_rol
-       WHERE u.username = ?`,
-            [username]
-        );
+                const [rows] = await pool.query(
+                        `SELECT u.id_usuario, u.nombre, u.apellido, u.email,
+                            u.username, u.password_hash, u.activo,
+                            r.id_rol, r.nombre_rol
+             FROM usuarios u
+             JOIN roles r ON r.id_rol = u.id_rol
+             WHERE u.username = ? OR u.email = ?`,
+                        [username, username]
+                );
 
         if (rows.length === 0) {
             return res.status(401).json({ message: 'Credenciales incorrectas.' });

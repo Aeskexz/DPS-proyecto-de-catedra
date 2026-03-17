@@ -35,7 +35,12 @@ const isAndroidEmulator = () => {
 };
 
 const getExpoHostIp = () => {
-    const hostUri = Constants.expoConfig?.hostUri || '';
+    const hostUri =
+        Constants.expoConfig?.hostUri ||
+        Constants.expoGoConfig?.debuggerHost ||
+        Constants.manifest2?.extra?.expoGo?.debuggerHost ||
+        Constants.manifest?.debuggerHost ||
+        '';
     const host = hostUri.split(':')[0];
     return host || null;
 };
@@ -104,7 +109,35 @@ api.interceptors.request.use(async (config) => {
 // Interceptor: manejo global de errores HTTP
 api.interceptors.response.use(
     (response) => response.data,
-    (error) => {
+    async (error) => {
+        const isAndroidNetworkError = Platform.OS === 'android' && !error?.response;
+        const originalConfig = error?.config;
+
+        if (isAndroidNetworkError && originalConfig && !originalConfig.__fallbackRetried) {
+            const fallbacks = getAndroidFallbackBaseUrls();
+
+            for (const baseUrl of fallbacks) {
+                if (baseUrl === (originalConfig.baseURL || BASE_URL)) continue;
+
+                try {
+                    const retriedResponse = await api.request({
+                        ...originalConfig,
+                        baseURL: baseUrl,
+                        __fallbackRetried: true,
+                    });
+
+                    api.defaults.baseURL = baseUrl;
+                    console.log('[API] Fallback baseURL activo:', baseUrl);
+                    return retriedResponse;
+                } catch (fallbackError) {
+                    if (fallbackError?.response) {
+                        const mensajeRespuesta = fallbackError.response?.data?.message || 'Error en solicitud.';
+                        return Promise.reject(new Error(mensajeRespuesta));
+                    }
+                }
+            }
+        }
+
         const mensaje = error.response?.data?.message || 'Error de conexión. Intenta de nuevo.';
         return Promise.reject(new Error(mensaje));
     }

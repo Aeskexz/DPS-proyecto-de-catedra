@@ -12,7 +12,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
     View, Text, FlatList, TouchableOpacity,
-    StyleSheet, ActivityIndicator, Alert, RefreshControl, useWindowDimensions, TextInput
+    StyleSheet, ActivityIndicator, Alert, RefreshControl, useWindowDimensions, TextInput, Platform
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { medicosService } from '../../services/api';
