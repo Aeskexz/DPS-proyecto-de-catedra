@@ -1,13 +1,3 @@
-// ============================================================
-// routes/especialidades.js - Catálogo de especialidades médicas
-// ============================================================
-// RESPONSABLE: Equipo Backend
-// ESTADO: Completo.
-//
-// ENDPOINTS:
-//   GET /api/especialidades  — Lista de especialidades (todos los roles)
-// ============================================================
-
 const express = require('express');
 const router = express.Router();
 const pool = require('../config/db');

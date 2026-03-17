@@ -1,23 +1,3 @@
-// ============================================================
-// routes/medicos.js - Gestión de médicos
-// ============================================================
-// RESPONSABLE: Equipo Backend
-// ESTADO: Completo.
-//
-// ENDPOINTS:
-//   GET  /api/medicos            — Todos los roles: lista de médicos activos
-//   GET  /api/medicos/:id        — Detalle de un médico (incluye horarios)
-//   POST /api/medicos            — Solo admin: registrar nuevo médico
-//   DELETE /api/medicos/:id      — Solo admin: desactivar médico + cancelar sus citas
-//
-// ================================================================
-// TODO PARA TUS COMPAÑEROS:
-//   - PUT /api/medicos/:id        — Editar datos del médico (nombre, especialidad, teléfono)
-//   - POST /api/medicos/:id/horarios — Agregar horario de disponibilidad
-//   - GET  /api/medicos/:id/horarios — Ver disponibilidad de un médico
-//   - GET  /api/medicos/:id/slots    — Calcular slots libres para una fecha concreta
-// ================================================================
-
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
@@ -35,10 +15,6 @@ const generarPasswordTemporal = () => {
     return password;
 };
 
-// -----------------------------------------------------------
-// GET /api/medicos
-// Cualquier usuario autenticado puede ver la lista de médicos.
-// -----------------------------------------------------------
 router.get('/', verifyToken, async (req, res) => {
     try {
         const [rows] = await pool.query(
@@ -66,10 +42,6 @@ router.get('/', verifyToken, async (req, res) => {
     }
 });
 
-// -----------------------------------------------------------
-// GET /api/medicos/:id
-// Detalle de un médico con sus horarios de disponibilidad.
-// -----------------------------------------------------------
 router.get('/:id', verifyToken, async (req, res) => {
     try {
         const [[medico]] = await pool.query(
@@ -101,11 +73,6 @@ router.get('/:id', verifyToken, async (req, res) => {
     }
 });
 
-// -----------------------------------------------------------
-// POST /api/medicos
-// Solo admin. Body: { nombre, apellido, email, username, password,
-//                     id_especialidad, numero_colegiado, telefono }
-// -----------------------------------------------------------
 router.post('/', verifyToken, requireRole([ADMIN]), async (req, res) => {
     const { nombre, apellido, email, username, password, id_especialidad, numero_colegiado, telefono } = req.body;
 
@@ -139,10 +106,6 @@ router.post('/', verifyToken, requireRole([ADMIN]), async (req, res) => {
     }
 });
 
-// -----------------------------------------------------------
-// PUT /api/medicos/:id — Solo admin
-// Editar datos básicos del médico por id_usuario
-// -----------------------------------------------------------
 router.put('/:id', verifyToken, requireRole([ADMIN]), async (req, res) => {
     const { id } = req.params;
     const { nombre, apellido, email, username, id_especialidad, numero_colegiado, telefono } = req.body;
@@ -185,9 +148,6 @@ router.put('/:id', verifyToken, requireRole([ADMIN]), async (req, res) => {
     }
 });
 
-// -----------------------------------------------------------
-// PUT /api/medicos/:id/restaurar-password — Solo admin
-// -----------------------------------------------------------
 router.put('/:id/restaurar-password', verifyToken, requireRole([ADMIN]), async (req, res) => {
     const { id } = req.params;
 
@@ -216,17 +176,11 @@ router.put('/:id/restaurar-password', verifyToken, requireRole([ADMIN]), async (
     }
 });
 
-// -----------------------------------------------------------
-// DELETE /api/medicos/:id — Solo admin
-// Elimina físicamente el médico de la base de datos
-// -----------------------------------------------------------
 router.delete('/:id', verifyToken, requireRole([ADMIN]), async (req, res) => {
-    const { id } = req.params; // id_usuario
+    const { id } = req.params;
     try {
-        // 1. Eliminar citas relacionadas para evitar error de FK
         await pool.query('DELETE FROM citas WHERE id_medico = (SELECT id_medico FROM medicos WHERE id_usuario = ?)', [id]);
 
-        // 2. Eliminar físicamente al usuario (MySQL borrará tabla `medicos` y `horarios` en cascada)
         const [result] = await pool.query('DELETE FROM usuarios WHERE id_usuario = ? AND id_rol = (SELECT id_rol FROM roles WHERE nombre_rol = "medico" LIMIT 1)', [id]);
 
         if (result.affectedRows === 0) {

@@ -1,15 +1,3 @@
-// ============================================================
-// routes/auth.js - Rutas de autenticación (login y registro)
-// ============================================================
-// RESPONSABLE: Equipo Backend
-// ESTADO: Completo.
-//
-// ENDPOINTS:
-//   POST /api/auth/login       — Cualquier usuario (admin/medico/cliente)
-//   POST /api/auth/register    — Solo registro de clientes (pacientes)
-//   POST /api/auth/logout      — Invalida la sesión en la BD (opcional)
-// ============================================================
-
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
@@ -17,11 +5,6 @@ const jwt = require('jsonwebtoken');
 const pool = require('../config/db');
 const { verifyToken } = require('../middleware/auth');
 
-// -----------------------------------------------------------
-// POST /api/auth/login
-// Body: { username, password }
-// Responde con: { token, user: { id, nombre, apellido, rol } }
-// -----------------------------------------------------------
 router.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
@@ -30,7 +13,6 @@ router.post('/login', async (req, res) => {
     }
 
     try {
-        // Buscar usuario con su rol
         const [rows] = await pool.query(
             `SELECT u.id_usuario, u.nombre, u.apellido, u.email,
               u.username, u.password_hash, u.activo,
@@ -47,21 +29,17 @@ router.post('/login', async (req, res) => {
 
         const user = rows[0];
 
-        // Verificar que la cuenta esté activa
         if (!user.activo) {
             return res.status(403).json({ message: 'Cuenta desactivada. Contacta al administrador.' });
         }
 
-        // Comparar contraseña
         const passwordValida = await bcrypt.compare(password, user.password_hash);
         if (!passwordValida) {
             return res.status(401).json({ message: 'Credenciales incorrectas.' });
         }
 
-        // Actualizar último acceso
         await pool.query('UPDATE usuarios SET ultimo_acceso = NOW() WHERE id_usuario = ?', [user.id_usuario]);
 
-        // Generar JWT
         const token = jwt.sign(
             {
                 id_usuario: user.id_usuario,
@@ -91,27 +69,18 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// -----------------------------------------------------------
-// POST /api/auth/register
-// Body: { nombre, apellido, email, username, password, telefono, fecha_nacimiento }
-// Solo registra CLIENTES (pacientes).
-// Para registrar médicos, el admin usa su propio endpoint.
-// -----------------------------------------------------------
 router.post('/register', async (req, res) => {
     const { nombre, apellido, email, username, password, telefono, fecha_nacimiento } = req.body;
 
-    // Validaciones básicas
     if (!nombre || !apellido || !email || !username || !password) {
         return res.status(400).json({ message: 'Todos los campos obligatorios deben ser completados.' });
     }
 
-    // Política de contraseña mínima (ampliar según necesidad)
     if (password.length < 8) {
         return res.status(400).json({ message: 'La contraseña debe tener al menos 8 caracteres.' });
     }
 
     try {
-        // Verificar que email y username no existan
         const [exist] = await pool.query(
             'SELECT id_usuario FROM usuarios WHERE email = ? OR username = ?',
             [email, username]
@@ -120,10 +89,8 @@ router.post('/register', async (req, res) => {
             return res.status(409).json({ message: 'El correo o nombre de usuario ya está registrado.' });
         }
 
-        // Hashear contraseña
         const password_hash = await bcrypt.hash(password, 12);
 
-        // Llamar al stored procedure sp_registrar_cliente
         const [result] = await pool.query(
             'CALL sp_registrar_cliente(?, ?, ?, ?, ?, ?, ?)',
             [nombre, apellido, email, username, password_hash, telefono || null, fecha_nacimiento || null]
@@ -141,11 +108,6 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// -----------------------------------------------------------
-// PUT /api/auth/me
-// Body opcional: { nombre, apellido, username, current_password, new_password }
-// Permite actualizar perfil y/o cambiar contraseña del usuario autenticado.
-// -----------------------------------------------------------
 router.put('/me', verifyToken, async (req, res) => {
     const { nombre, apellido, username, current_password, new_password } = req.body;
     const id_usuario = req.user.id_usuario;
@@ -225,11 +187,6 @@ router.put('/me', verifyToken, async (req, res) => {
     }
 });
 
-// -----------------------------------------------------------
-// DELETE /api/auth/me
-// Body: { password }
-// Elimina la cuenta del usuario autenticado.
-// -----------------------------------------------------------
 router.delete('/me', verifyToken, async (req, res) => {
     const { password } = req.body;
     const { id_usuario, id_rol } = req.user;

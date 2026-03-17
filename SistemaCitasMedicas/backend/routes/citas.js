@@ -1,44 +1,18 @@
-// ============================================================
-// routes/citas.js - CRUD de citas médicas
-// ============================================================
-// RESPONSABLE: Equipo Backend
-// ESTADO: Completo.
-//
-// ENDPOINTS:
-//   GET  /api/citas              — Admin: todas las citas | Cliente: sus citas | Médico: sus citas
-//   POST /api/citas              — Solo clientes: crear nueva cita
-//   PUT  /api/citas/:id/estado   — Médico: confirmar/completar | Admin: cualquier cambio
-//   DELETE /api/citas/:id        — Solo admin
-//
-// ================================================================
-// TODO PARA TUS COMPAÑEROS:
-//   - Agregar paginación en GET /api/citas (límite, página)
-//   - Agregar filtros: por fecha, por estado, por médico
-//   - Enviar notificación (email/push) al crear/cancelar cita
-// ================================================================
-
 const express = require('express');
 const router = express.Router();
 const pool = require('../config/db');
 const { verifyToken, requireRole } = require('../middleware/auth');
 
-// ID de roles: 1=admin, 2=medico, 3=cliente
 const ADMIN = 1, MEDICO = 2, CLIENTE = 3;
 
-// -----------------------------------------------------------
-// GET /api/citas
-// Cada rol ve solo lo que le corresponde.
-// -----------------------------------------------------------
 router.get('/', verifyToken, async (req, res) => {
     try {
         let rows;
         const { id_usuario, id_rol } = req.user;
 
         if (id_rol === ADMIN) {
-            // Admin ve todo usando la vista v_citas_detalle
             [rows] = await pool.query('SELECT * FROM v_citas_detalle ORDER BY fecha_cita DESC, hora_cita DESC');
         } else if (id_rol === MEDICO) {
-            // Médico ve solo sus citas
             const [[medico]] = await pool.query('SELECT id_medico FROM medicos WHERE id_usuario = ?', [id_usuario]);
             if (!medico) return res.status(404).json({ message: 'Perfil de médico no encontrado.' });
             [rows] = await pool.query(
@@ -46,7 +20,6 @@ router.get('/', verifyToken, async (req, res) => {
                 [medico.id_medico]
             );
         } else {
-            // Cliente ve solo sus citas
             const [[cliente]] = await pool.query('SELECT id_cliente FROM clientes WHERE id_usuario = ?', [id_usuario]);
             if (!cliente) return res.status(404).json({ message: 'Perfil de cliente no encontrado.' });
             [rows] = await pool.query(
@@ -70,10 +43,6 @@ router.get('/', verifyToken, async (req, res) => {
     }
 });
 
-// -----------------------------------------------------------
-// POST /api/citas
-// Solo clientes. Body: { id_medico, fecha_cita, hora_cita, motivo_consulta }
-// -----------------------------------------------------------
 router.post('/', verifyToken, requireRole([CLIENTE]), async (req, res) => {
     const { id_medico, fecha_cita, hora_cita, motivo_consulta } = req.body;
 
@@ -88,7 +57,6 @@ router.post('/', verifyToken, requireRole([CLIENTE]), async (req, res) => {
         );
         if (!cliente) return res.status(404).json({ message: 'Perfil de cliente no encontrado.' });
 
-        // Llamar al stored procedure (valida que el slot no esté ocupado)
         const [result] = await pool.query(
             'CALL sp_crear_cita(?, ?, ?, ?, ?)',
             [cliente.id_cliente, id_medico, fecha_cita, hora_cita, motivo_consulta || null]
@@ -99,7 +67,6 @@ router.post('/', verifyToken, requireRole([CLIENTE]), async (req, res) => {
             id_cita: result[0][0].nueva_cita_id,
         });
     } catch (error) {
-        // El stored procedure lanza SIGNAL si ya hay cita en ese horario
         if (error.sqlState === '45000') {
             return res.status(409).json({ message: error.sqlMessage });
         }
@@ -108,12 +75,6 @@ router.post('/', verifyToken, requireRole([CLIENTE]), async (req, res) => {
     }
 });
 
-// -----------------------------------------------------------
-// PUT /api/citas/:id/estado
-// Médico: puede poner 'confirmada' o 'completada' y agregar notas.
-// Admin: puede poner cualquier estado.
-// Body: { estado, notas_medico? }
-// -----------------------------------------------------------
 router.put('/:id/estado', verifyToken, requireRole([ADMIN, MEDICO]), async (req, res) => {
     const { id } = req.params;
     const { estado, notas_medico } = req.body;
@@ -124,7 +85,6 @@ router.put('/:id/estado', verifyToken, requireRole([ADMIN, MEDICO]), async (req,
     }
 
     try {
-        // Si es médico, verificar que la cita le pertenece
         if (req.user.id_rol === MEDICO) {
             const [[medico]] = await pool.query('SELECT id_medico FROM medicos WHERE id_usuario = ?', [req.user.id_usuario]);
             const [[cita]] = await pool.query('SELECT id_medico FROM citas WHERE id_cita = ?', [id]);
@@ -146,10 +106,6 @@ router.put('/:id/estado', verifyToken, requireRole([ADMIN, MEDICO]), async (req,
     }
 });
 
-// -----------------------------------------------------------
-// DELETE /api/citas/:id
-// Solo admin. Llama al stored procedure que registra en auditoría.
-// -----------------------------------------------------------
 router.delete('/:id', verifyToken, requireRole([ADMIN]), async (req, res) => {
     const { id } = req.params;
     try {

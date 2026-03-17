@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
     View, Text, FlatList, TouchableOpacity,
-    StyleSheet, ActivityIndicator, Alert, RefreshControl, useWindowDimensions
+    StyleSheet, ActivityIndicator, Alert, RefreshControl, useWindowDimensions, SafeAreaView
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../../context/AuthContext';
 import { citasService } from '../../services/api';
 import { getResponsive } from '../../utils/responsive';
@@ -69,6 +69,13 @@ const ClienteDashboard = ({ navigation }) => {
 
     useEffect(() => { cargarCitas(); }, [cargarCitas]);
 
+    // Recargar citas cuando la pantalla recupera el foco (al volver de NuevaCita)
+    useFocusEffect(
+        useCallback(() => {
+            cargarCitas();
+        }, [cargarCitas])
+    );
+
     const onRefresh = () => { setRefreshing(true); cargarCitas(); };
 
     if (loading) {
@@ -81,7 +88,7 @@ const ClienteDashboard = ({ navigation }) => {
     }
 
     return (
-        <SafeAreaView style={styles.container} edges={['top']}>
+        <View style={styles.container}>
             {/* Header mejorado visualmente */}
             <View style={styles.header}>
                 <View style={[styles.headerTop, isMobile && styles.headerTopMobile]}>
@@ -114,14 +121,14 @@ const ClienteDashboard = ({ navigation }) => {
             />
 
             {/* Botón Flotante (FAB) más moderno */}
-            <TouchableOpacity 
-                style={styles.fab} 
-                onPress={() => navigation.navigate('NuevaCita', { onVolver: cargarCitas })}
+            <TouchableOpacity
+                style={styles.fab}
+                onPress={() => navigation.navigate('NuevaCita')}
                 activeOpacity={0.8}
             >
                 <Text style={styles.fabTexto}>+ Nueva Cita</Text>
             </TouchableOpacity>
-        </SafeAreaView>
+        </View>
     );
 };
 
@@ -190,13 +197,14 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: 30,
         right: 20,
-        left: 20, // Lo mantenemos ancho como el original pero con mejor estilo
-        backgroundColor: '#2563EB', // Tu color original
+        left: 20,
+        backgroundColor: '#2563EB',
         borderRadius: 16,
         paddingVertical: 18,
         alignItems: 'center',
         justifyContent: 'center',
         elevation: 8,
+        zIndex: 999,
         shadowColor: '#2563EB',
         shadowOpacity: 0.3,
         shadowRadius: 10,

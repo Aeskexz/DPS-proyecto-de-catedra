@@ -1,0 +1,22 @@
+# Backend .gitignore
+
+# dependencies
+node_modules/
+
+# local env files
+.env
+
+# logs
+logs/
+*.log
+npm-debug.*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
