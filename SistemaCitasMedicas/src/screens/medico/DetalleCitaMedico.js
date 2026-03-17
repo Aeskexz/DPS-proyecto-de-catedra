@@ -1,14 +1,3 @@
-// ============================================================
-// src/screens/medico/DetalleCitaMedico.js
-// ============================================================
-// RESPONSABLE: Equipo Frontend
-// ESTADO: Completo. El médico puede cambiar estado y agregar notas.
-//
-// TODO PARA TUS COMPAÑEROS:
-//   - Agregar historial de citas previas del mismo paciente
-//   - Mostrar alerta de confirmación antes de cambiar estado
-// ============================================================
-
 import React, { useState } from 'react';
 import {
     View, Text, TextInput, TouchableOpacity,
@@ -31,8 +20,8 @@ const DetalleCitaMedico = ({ route, navigation }) => {
         setLoading(true);
         try {
             await citasService.actualizarEstado(cita.id_cita, estadoSel, notas.trim() || undefined);
-            Alert.alert('Guardado', 'Cita actualizada correctamente.', [
-                { text: 'OK', onPress: () => { if (onVolver) onVolver(); navigation.goBack(); } },
+            Alert.alert('¡Éxito!', 'La ficha de la cita ha sido actualizada.', [
+                { text: 'Entendido', onPress: () => { if (onVolver) onVolver(); navigation.goBack(); } },
             ]);
         } catch (error) {
             Alert.alert('Error', error.message);
@@ -42,60 +31,89 @@ const DetalleCitaMedico = ({ route, navigation }) => {
     };
 
     return (
-        <ScrollView contentContainerStyle={[styles.container, { paddingHorizontal: horizontalPadding }]}> 
+        <ScrollView style={styles.main} contentContainerStyle={[styles.container, { paddingHorizontal: horizontalPadding }]}> 
             <View style={[styles.wrapper, { maxWidth: contentMaxWidth }]}> 
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-                <Text style={styles.back}>← Volver</Text>
-            </TouchableOpacity>
+            
+            {/* Header con estilo de barra superior */}
+            <View style={styles.headerBar}>
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                    <Text style={styles.backText}>← Volver</Text>
+                </TouchableOpacity>
+                <Text style={styles.headerTitulo}>Expediente de Cita</Text>
+            </View>
 
-            <Text style={styles.titulo}>Detalle de Cita</Text>
-
+            {/* Ficha del Paciente */}
             <View style={styles.infoCard}>
-                <Text style={styles.label}>Paciente</Text>
-                <Text style={styles.valor}>{cita.nombre_paciente}</Text>
-                <Text style={styles.label}>Correo</Text>
-                <Text style={styles.valor}>{cita.email_paciente}</Text>
-                <Text style={styles.label}>Fecha y Hora</Text>
-                <Text style={styles.valor}>{cita.fecha_cita}  {cita.hora_cita?.slice(0, 5)}</Text>
-                {cita.motivo_consulta ? (
-                    <>
-                        <Text style={styles.label}>Motivo</Text>
-                        <Text style={styles.valor}>{cita.motivo_consulta}</Text>
-                    </>
-                ) : null}
+                <View style={styles.cardHeader}>
+                    <Text style={styles.pacienteNombre}>{cita.nombre_paciente}</Text>
+                    <Text style={styles.pacienteEmail}>{cita.email_paciente}</Text>
+                </View>
+                
+                <View style={styles.divider} />
+                
+                <View style={styles.detalleFila}>
+                    <View style={styles.detalleItem}>
+                        <Text style={styles.label}>FECHA</Text>
+                        <Text style={styles.valor}>{cita.fecha_cita}</Text>
+                    </View>
+                    <View style={styles.detalleItem}>
+                        <Text style={styles.label}>HORA</Text>
+                        <Text style={styles.valor}>{cita.hora_cita?.slice(0, 5)} HS</Text>
+                    </View>
+                </View>
+
+                {cita.motivo_consulta && (
+                    <View style={styles.motivoBox}>
+                        <Text style={styles.label}>MOTIVO DE CONSULTA</Text>
+                        <Text style={styles.motivoTexto}>{cita.motivo_consulta}</Text>
+                    </View>
+                )}
             </View>
 
-            <Text style={styles.seccion}>Actualizar Estado</Text>
-            <View style={styles.estadosRow}>
-                {ESTADOS.map((e) => (
-                    <TouchableOpacity
-                        key={e}
-                        style={[styles.estadoBtn, estadoSel === e && styles.estadoBtnSel]}
-                        onPress={() => setEstadoSel(e)}
-                    >
-                        <Text style={[styles.estadoText, estadoSel === e && styles.estadoTextSel]}>
-                            {e.charAt(0).toUpperCase() + e.slice(1)}
-                        </Text>
-                    </TouchableOpacity>
-                ))}
+            {/* Control de Estado */}
+            <Text style={styles.seccionTitulo}>Actualizar situación</Text>
+            <View style={styles.estadosContainer}>
+                {ESTADOS.map((e) => {
+                    const esSeleccionado = estadoSel === e;
+                    return (
+                        <TouchableOpacity
+                            key={e}
+                            activeOpacity={0.7}
+                            style={[styles.estadoChip, esSeleccionado && styles.estadoChipSel]}
+                            onPress={() => setEstadoSel(e)}
+                        >
+                            <Text style={[styles.estadoChipText, esSeleccionado && styles.estadoChipTextSel]}>
+                                {e.toUpperCase()}
+                            </Text>
+                        </TouchableOpacity>
+                    );
+                })}
             </View>
 
-            <Text style={styles.seccion}>Notas del Médico</Text>
-            <TextInput
-                style={styles.textarea}
-                placeholder="Agrega observaciones o indicaciones para el paciente..."
-                multiline
-                value={notas}
-                onChangeText={setNotas}
-                textAlignVertical="top"
-            />
+            {/* Notas Médicas */}
+            <Text style={styles.seccionTitulo}>Observaciones Médicas</Text>
+            <View style={styles.inputWrapper}>
+                <TextInput
+                    style={styles.textarea}
+                    placeholder="Escriba aquí el diagnóstico, recetas o indicaciones..."
+                    placeholderTextColor="#94A3B8"
+                    multiline
+                    value={notas}
+                    onChangeText={setNotas}
+                    textAlignVertical="top"
+                />
+            </View>
 
             <TouchableOpacity
-                style={[styles.boton, loading && { opacity: 0.6 }]}
+                style={[styles.botonGuardar, loading && { opacity: 0.7 }]}
                 onPress={guardar}
                 disabled={loading}
             >
-                {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.botonTexto}>Guardar Cambios</Text>}
+                {loading ? (
+                    <ActivityIndicator color="#fff" />
+                ) : (
+                    <Text style={styles.botonTexto}>Finalizar y Guardar</Text>
+                )}
             </TouchableOpacity>
             </View>
         </ScrollView>
@@ -103,34 +121,57 @@ const DetalleCitaMedico = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
-    container: { paddingVertical: 20, backgroundColor: '#F0FDF4', flexGrow: 1 },
+    main: { backgroundColor: '#F8FAFC' },
+    container: { paddingVertical: 20, flexGrow: 1 },
     wrapper: { width: '100%', alignSelf: 'center' },
-    back: { color: '#166534', fontWeight: '600', marginTop: 30, marginBottom: 10 },
-    titulo: { fontSize: 22, fontWeight: 'bold', color: '#166534', marginBottom: 20 },
+    
+    // Header
+    headerBar: { flexDirection: 'row', alignItems: 'center', marginBottom: 25, marginTop: 15 },
+    backButton: { paddingRight: 15 },
+    backText: { color: '#166534', fontWeight: '700', fontSize: 16 },
+    headerTitulo: { fontSize: 20, fontWeight: '800', color: '#1E293B', flex: 1 },
+
+    // Ficha Paciente
     infoCard: {
-        backgroundColor: '#fff', borderRadius: 12, padding: 16, marginBottom: 20,
-        elevation: 2, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 4,
+        backgroundColor: '#fff', borderRadius: 20, padding: 20, marginBottom: 25,
+        elevation: 4, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 10,
+        borderTopWidth: 4, borderTopColor: '#166534'
     },
-    label: { fontSize: 12, color: '#64748B', fontWeight: '600', marginTop: 8 },
-    valor: { fontSize: 15, color: '#1E293B', marginTop: 2 },
-    seccion: { fontSize: 15, fontWeight: '700', color: '#166534', marginBottom: 10 },
-    estadosRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 },
-    estadoBtn: {
-        borderWidth: 1.5, borderColor: '#16A34A', borderRadius: 20,
-        paddingHorizontal: 14, paddingVertical: 6,
+    cardHeader: { marginBottom: 15 },
+    pacienteNombre: { fontSize: 22, fontWeight: '800', color: '#1E293B' },
+    pacienteEmail: { fontSize: 14, color: '#64748B', marginTop: 2 },
+    divider: { height: 1, backgroundColor: '#F1F5F9', marginBottom: 15 },
+    detalleFila: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 15 },
+    detalleItem: { flex: 1 },
+    label: { fontSize: 11, color: '#94A3B8', fontWeight: '800', letterSpacing: 0.5 },
+    valor: { fontSize: 16, color: '#1E293B', fontWeight: '600', marginTop: 4 },
+    motivoBox: { backgroundColor: '#F8FAFC', padding: 12, borderRadius: 12, marginTop: 5 },
+    motivoTexto: { fontSize: 14, color: '#475569', marginTop: 4, lineHeight: 20 },
+
+    // Estados
+    seccionTitulo: { fontSize: 15, fontWeight: '800', color: '#334155', marginBottom: 12, paddingLeft: 5 },
+    estadosContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 25 },
+    estadoChip: {
+        paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12,
+        backgroundColor: '#fff', borderWidth: 1.5, borderColor: '#E2E8F0'
     },
-    estadoBtnSel: { backgroundColor: '#16A34A' },
-    estadoText: { color: '#16A34A', fontWeight: '600', fontSize: 13 },
-    estadoTextSel: { color: '#fff' },
+    estadoChipSel: { backgroundColor: '#166534', borderColor: '#166534' },
+    estadoChipText: { color: '#64748B', fontWeight: '700', fontSize: 12 },
+    estadoChipTextSel: { color: '#fff' },
+
+    // Input
+    inputWrapper: { backgroundColor: '#fff', borderRadius: 15, padding: 5, elevation: 1 },
     textarea: {
-        backgroundColor: '#fff', borderWidth: 1, borderColor: '#CBD5E1',
-        borderRadius: 10, padding: 14, minHeight: 100, fontSize: 14, marginBottom: 20,
+        minHeight: 120, padding: 15, fontSize: 15, color: '#1E293B',
     },
-    boton: {
-        backgroundColor: '#166534', borderRadius: 12,
-        paddingVertical: 16, alignItems: 'center', marginBottom: 40,
+
+    // Botón
+    botonGuardar: {
+        backgroundColor: '#166534', borderRadius: 16, paddingVertical: 18,
+        alignItems: 'center', marginTop: 30, marginBottom: 40,
+        elevation: 6, shadowColor: '#166534', shadowOpacity: 0.3, shadowRadius: 8
     },
-    botonTexto: { color: '#fff', fontWeight: '700', fontSize: 16 },
+    botonTexto: { color: '#fff', fontWeight: '800', fontSize: 16 },
 });
 
 export default DetalleCitaMedico;
