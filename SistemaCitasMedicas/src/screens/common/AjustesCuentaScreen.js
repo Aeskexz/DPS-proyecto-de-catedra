@@ -1,15 +1,7 @@
 import React, { useState } from 'react';
 import {
-    View,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    StyleSheet,
-    Alert,
-    ScrollView,
-    KeyboardAvoidingView,
-    Platform,
-    ActivityIndicator,
+    View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, 
+    ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator, 
     useWindowDimensions,
 } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
@@ -19,6 +11,9 @@ const AjustesCuentaScreen = ({ navigation }) => {
     const { user, updateMiCuenta, eliminarMiCuenta } = useAuth();
     const { width } = useWindowDimensions();
     const { horizontalPadding, contentMaxWidth } = getResponsive(width);
+    
+    // Detectamos el color principal según el rol para mantener la identidad
+    const colorPrincipal = user?.rol === 'medico' ? '#166534' : '#2563EB';
     const esAdmin = user?.rol === 'administrador' || user?.id_rol === 1;
 
     const [nombre, setNombre] = useState(user?.nombre || '');
@@ -53,7 +48,7 @@ const AjustesCuentaScreen = ({ navigation }) => {
                 apellido: apellido.trim(),
                 username: username.trim(),
             });
-            showMessage('Éxito', 'Tus datos fueron actualizados.');
+            showMessage('Éxito', 'Tus datos fueron actualizados correctamente.');
         } catch (error) {
             showMessage('Error', error.message);
         } finally {
@@ -63,15 +58,13 @@ const AjustesCuentaScreen = ({ navigation }) => {
 
     const handleCambiarPassword = async () => {
         if (!currentPassword || !newPassword || !confirmNewPassword) {
-            return showMessage('Campos requeridos', 'Debes ingresar contraseña actual, nueva contraseña y su confirmación.');
+            return showMessage('Campos requeridos', 'Completa todos los campos de contraseña.');
         }
-
         if (newPassword.length < 8) {
-            return showMessage('Contraseña inválida', 'La nueva contraseña debe tener al menos 8 caracteres.');
+            return showMessage('Contraseña corta', 'La nueva contraseña debe tener al menos 8 caracteres.');
         }
-
         if (newPassword !== confirmNewPassword) {
-            return showMessage('Contraseñas no coinciden', 'La confirmación de la nueva contraseña no coincide.');
+            return showMessage('Error', 'Las nuevas contraseñas no coinciden.');
         }
 
         setLoadingUpdate(true);
@@ -93,14 +86,11 @@ const AjustesCuentaScreen = ({ navigation }) => {
 
     const confirmarEliminacion = () => {
         const ejecutar = async () => {
-            if (!deletePassword) {
-                return showMessage('Campo requerido', 'Ingresa tu contraseña para eliminar tu cuenta.');
-            }
-
+            if (!deletePassword) return showMessage('Seguridad', 'Ingresa tu contraseña para confirmar.');
             setLoadingDelete(true);
             try {
                 await eliminarMiCuenta(deletePassword);
-                showMessage('Cuenta eliminada', 'Tu cuenta fue eliminada correctamente.');
+                showMessage('Adiós', 'Cuenta eliminada correctamente.');
             } catch (error) {
                 showMessage('Error', error.message);
             } finally {
@@ -109,111 +99,101 @@ const AjustesCuentaScreen = ({ navigation }) => {
         };
 
         if (Platform.OS === 'web') {
-            if (window.confirm('¿Seguro que deseas eliminar tu cuenta? Esta acción no se puede deshacer.')) {
-                ejecutar();
-            }
+            if (window.confirm('¿Seguro que deseas eliminar tu cuenta? Esta acción no se puede deshacer.')) ejecutar();
             return;
         }
 
         Alert.alert(
             'Eliminar cuenta',
             '¿Seguro que deseas eliminar tu cuenta? Esta acción no se puede deshacer.',
-            [
-                { text: 'Cancelar', style: 'cancel' },
-                { text: 'Eliminar', style: 'destructive', onPress: ejecutar },
-            ]
+            [{ text: 'Cancelar', style: 'cancel' }, { text: 'Eliminar', style: 'destructive', onPress: ejecutar }]
         );
     };
 
     return (
-        <KeyboardAvoidingView
-            style={styles.container}
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        >
+        <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
             <ScrollView contentContainerStyle={[styles.content, { paddingHorizontal: horizontalPadding }]}> 
                 <View style={[styles.wrapper, { maxWidth: contentMaxWidth }]}> 
-                <View style={styles.header}>
-                    <Text style={styles.title}>Ajustes de cuenta</Text>
-                    <TouchableOpacity onPress={() => navigation.goBack()}>
-                        <Text style={styles.back}>Volver</Text>
-                    </TouchableOpacity>
-                </View>
-
-                <View style={styles.card}>
-                    <Text style={styles.sectionTitle}>Datos de perfil</Text>
-                    <Text style={styles.label}>Nombre</Text>
-                    <TextInput style={styles.input} value={nombre} onChangeText={setNombre} />
-
-                    <Text style={styles.label}>Apellido</Text>
-                    <TextInput style={styles.input} value={apellido} onChangeText={setApellido} />
-
-                    <Text style={styles.label}>Usuario</Text>
-                    <TextInput
-                        style={styles.input}
-                        value={username}
-                        autoCapitalize="none"
-                        onChangeText={setUsername}
-                    />
-
-                    <TouchableOpacity style={styles.primaryBtn} onPress={handleActualizarDatos} disabled={loadingUpdate}>
-                        {loadingUpdate ? <ActivityIndicator color="#fff" /> : <Text style={styles.primaryBtnText}>Guardar datos</Text>}
-                    </TouchableOpacity>
-                </View>
-
-                <View style={styles.card}>
-                    <Text style={styles.sectionTitle}>Cambiar contraseña</Text>
-                    <Text style={styles.label}>Contraseña actual</Text>
-                    <TextInput
-                        style={styles.input}
-                        secureTextEntry
-                        value={currentPassword}
-                        onChangeText={setCurrentPassword}
-                    />
-
-                    <Text style={styles.label}>Nueva contraseña</Text>
-                    <TextInput
-                        style={styles.input}
-                        secureTextEntry
-                        value={newPassword}
-                        onChangeText={setNewPassword}
-                    />
-
-                    <Text style={styles.label}>Confirmar nueva contraseña</Text>
-                    <TextInput
-                        style={styles.input}
-                        secureTextEntry
-                        value={confirmNewPassword}
-                        onChangeText={setConfirmNewPassword}
-                    />
-
-                    <TouchableOpacity style={styles.primaryBtn} onPress={handleCambiarPassword} disabled={loadingUpdate}>
-                        {loadingUpdate ? <ActivityIndicator color="#fff" /> : <Text style={styles.primaryBtnText}>Actualizar contraseña</Text>}
-                    </TouchableOpacity>
-                </View>
-
-                {esAdmin ? (
-                    <View style={styles.card}>
-                        <Text style={styles.sectionTitle}>Seguridad de cuenta</Text>
-                        <Text style={styles.infoText}>La cuenta administrador está protegida y no se puede eliminar para evitar pérdida de acceso al sistema.</Text>
-                    </View>
-                ) : (
-                    <View style={styles.cardDanger}>
-                        <Text style={styles.sectionTitle}>Eliminar cuenta</Text>
-                        <Text style={styles.warningText}>Esta acción elimina tu cuenta de forma permanente.</Text>
-
-                        <Text style={styles.label}>Confirma tu contraseña</Text>
-                        <TextInput
-                            style={styles.input}
-                            secureTextEntry
-                            value={deletePassword}
-                            onChangeText={setDeletePassword}
-                        />
-
-                        <TouchableOpacity style={styles.dangerBtn} onPress={confirmarEliminacion} disabled={loadingDelete}>
-                            {loadingDelete ? <ActivityIndicator color="#fff" /> : <Text style={styles.dangerBtnText}>Eliminar mi cuenta</Text>}
+                    
+                    <View style={styles.header}>
+                        <View>
+                            <Text style={styles.title}>Mi Cuenta</Text>
+                            <Text style={styles.subtitle}>Gestiona tu información personal</Text>
+                        </View>
+                        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+                            <Text style={[styles.backText, { color: colorPrincipal }]}>Volver</Text>
                         </TouchableOpacity>
                     </View>
-                )}
+
+                    {/* Sección: Datos Personales */}
+                    <View style={styles.card}>
+                        <Text style={[styles.sectionTitle, { color: colorPrincipal }]}>Datos de perfil</Text>
+                        
+                        <Text style={styles.label}>Nombre</Text>
+                        <TextInput style={styles.input} value={nombre} onChangeText={setNombre} placeholder="Tu nombre" />
+
+                        <Text style={styles.label}>Apellido</Text>
+                        <TextInput style={styles.input} value={apellido} onChangeText={setApellido} placeholder="Tu apellido" />
+
+                        <Text style={styles.label}>Nombre de usuario</Text>
+                        <TextInput style={styles.input} value={username} autoCapitalize="none" onChangeText={setUsername} placeholder="usuario123" />
+
+                        <TouchableOpacity 
+                            style={[styles.primaryBtn, { backgroundColor: colorPrincipal }]} 
+                            onPress={handleActualizarDatos} 
+                            disabled={loadingUpdate}
+                        >
+                            {loadingUpdate ? <ActivityIndicator color="#fff" /> : <Text style={styles.primaryBtnText}>Guardar Cambios</Text>}
+                        </TouchableOpacity>
+                    </View>
+
+                    {/* Sección: Seguridad */}
+                    <View style={styles.card}>
+                        <Text style={[styles.sectionTitle, { color: colorPrincipal }]}>Cambiar contraseña</Text>
+                        
+                        <Text style={styles.label}>Contraseña actual</Text>
+                        <TextInput style={styles.input} secureTextEntry value={currentPassword} onChangeText={setCurrentPassword} placeholder="••••••••" />
+
+                        <Text style={styles.label}>Nueva contraseña</Text>
+                        <TextInput style={styles.input} secureTextEntry value={newPassword} onChangeText={setNewPassword} placeholder="Mínimo 8 caracteres" />
+
+                        <Text style={styles.label}>Confirmar nueva contraseña</Text>
+                        <TextInput style={styles.input} secureTextEntry value={confirmNewPassword} onChangeText={setConfirmNewPassword} placeholder="Repite la contraseña" />
+
+                        <TouchableOpacity 
+                            style={[styles.primaryBtn, { backgroundColor: colorPrincipal }]} 
+                            onPress={handleCambiarPassword} 
+                            disabled={loadingUpdate}
+                        >
+                            {loadingUpdate ? <ActivityIndicator color="#fff" /> : <Text style={styles.primaryBtnText}>Actualizar Contraseña</Text>}
+                        </TouchableOpacity>
+                    </View>
+
+                    {/* Sección: Peligro */}
+                    {esAdmin ? (
+                        <View style={styles.cardInfo}>
+                            <Text style={styles.sectionTitle}>🛡️ Seguridad de Admin</Text>
+                            <Text style={styles.infoText}>Esta cuenta tiene privilegios de administrador y no puede ser eliminada para garantizar la gestión del sistema.</Text>
+                        </View>
+                    ) : (
+                        <View style={styles.cardDanger}>
+                            <Text style={styles.dangerTitle}>Zona de peligro</Text>
+                            <Text style={styles.warningText}>Una vez eliminada la cuenta, no hay marcha atrás. Se borrarán todas tus citas y registros.</Text>
+
+                            <Text style={styles.label}>Contraseña de confirmación</Text>
+                            <TextInput
+                                style={[styles.input, { borderColor: '#FCA5A5' }]}
+                                secureTextEntry
+                                value={deletePassword}
+                                onChangeText={setDeletePassword}
+                                placeholder="Confirma para eliminar"
+                            />
+
+                            <TouchableOpacity style={styles.dangerBtn} onPress={confirmarEliminacion} disabled={loadingDelete}>
+                                {loadingDelete ? <ActivityIndicator color="#fff" /> : <Text style={styles.dangerBtnText}>Eliminar mi cuenta permanentemente</Text>}
+                            </TouchableOpacity>
+                        </View>
+                    )}
                 </View>
             </ScrollView>
         </KeyboardAvoidingView>
@@ -221,59 +201,69 @@ const AjustesCuentaScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#F1F5F9' },
-    content: { paddingVertical: 16, paddingBottom: 40 },
+    container: { flex: 1, backgroundColor: '#F8FAFC' },
+    content: { paddingVertical: 20, paddingBottom: 50 },
     wrapper: { width: '100%', alignSelf: 'center' },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 14,
+        marginBottom: 25,
     },
-    title: { fontSize: 24, fontWeight: '700', color: '#0F172A' },
-    back: { color: '#2563EB', fontWeight: '600' },
+    title: { fontSize: 26, fontWeight: '800', color: '#0F172A' },
+    subtitle: { fontSize: 14, color: '#64748B', marginTop: 2 },
+    backBtn: { backgroundColor: '#fff', paddingHorizontal: 15, paddingVertical: 8, borderRadius: 10, elevation: 2 },
+    backText: { fontWeight: '700' },
+
     card: {
         backgroundColor: '#fff',
-        borderRadius: 12,
-        padding: 14,
-        marginBottom: 14,
-        elevation: 2,
+        borderRadius: 20,
+        padding: 20,
+        marginBottom: 20,
+        elevation: 3,
+        shadowColor: '#000',
+        shadowOpacity: 0.05,
+        shadowRadius: 10,
     },
+    cardInfo: { backgroundColor: '#E0F2FE', borderRadius: 20, padding: 20, marginBottom: 20, borderWidth: 1, borderColor: '#7DD3FC' },
     cardDanger: {
-        backgroundColor: '#fff',
-        borderRadius: 12,
-        padding: 14,
-        marginBottom: 14,
+        backgroundColor: '#FFF1F2',
+        borderRadius: 20,
+        padding: 20,
+        marginBottom: 20,
         borderWidth: 1,
-        borderColor: '#FCA5A5',
+        borderColor: '#FECACA',
     },
-    sectionTitle: { fontSize: 16, fontWeight: '700', color: '#1E293B', marginBottom: 10 },
-    label: { color: '#334155', marginBottom: 4, fontWeight: '600' },
+    sectionTitle: { fontSize: 17, fontWeight: '700', marginBottom: 15 },
+    dangerTitle: { fontSize: 17, fontWeight: '700', color: '#991B1B', marginBottom: 10 },
+    label: { color: '#475569', marginBottom: 6, fontWeight: '700', fontSize: 13, textTransform: 'uppercase' },
     input: {
-        borderWidth: 1,
-        borderColor: '#CBD5E1',
-        borderRadius: 10,
-        paddingHorizontal: 12,
-        paddingVertical: 10,
+        borderWidth: 1.5,
+        borderColor: '#E2E8F0',
+        borderRadius: 12,
+        paddingHorizontal: 15,
+        paddingVertical: 12,
         backgroundColor: '#F8FAFC',
-        marginBottom: 12,
+        marginBottom: 16,
+        fontSize: 15,
     },
     primaryBtn: {
-        backgroundColor: '#2563EB',
-        borderRadius: 10,
-        paddingVertical: 12,
+        borderRadius: 12,
+        paddingVertical: 15,
         alignItems: 'center',
+        marginTop: 5,
     },
-    primaryBtnText: { color: '#fff', fontWeight: '700' },
-    warningText: { color: '#991B1B', marginBottom: 10 },
-    infoText: { color: '#334155', marginBottom: 4 },
+    primaryBtnText: { color: '#fff', fontWeight: '800', fontSize: 15 },
+    warningText: { color: '#991B1B', marginBottom: 15, fontSize: 13, lineHeight: 18 },
+    infoText: { color: '#0369A1', fontSize: 14, lineHeight: 20 },
     dangerBtn: {
         backgroundColor: '#DC2626',
-        borderRadius: 10,
-        paddingVertical: 12,
+        borderRadius: 12,
+        paddingVertical: 15,
         alignItems: 'center',
+        marginTop: 5,
     },
-    dangerBtnText: { color: '#fff', fontWeight: '700' },
+    dangerBtnText: { color: '#fff', fontWeight: '800', fontSize: 15 },
 });
 
 export default AjustesCuentaScreen;
