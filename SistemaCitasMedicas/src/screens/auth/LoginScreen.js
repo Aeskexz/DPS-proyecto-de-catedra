@@ -48,7 +48,7 @@ const LoginScreen = ({ navigation }) => {
                         <Text style={styles.label}>Usuario o Correo</Text>
                         <TextInput
                             style={styles.input}
-                            placeholder="Ej. jperez"
+                            placeholder="Digite su usuario o correo..."
                             placeholderTextColor="#94A3B8"
                             autoCapitalize="none"
                             value={username}
