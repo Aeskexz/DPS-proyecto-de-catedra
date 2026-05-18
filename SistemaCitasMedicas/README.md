@@ -47,26 +47,35 @@ SistemaCitasMedicas/
 ##  Cómo Arrancar el Proyecto
 
 ### 1. Base de Datos
-Importa el script SQL en PhpMyAdmin (archivo `database.sql` en la raíz del repo).
+Usa tu base existente `investigacion_descriptiva` en MySQL. Si necesitas cargar médicos de ejemplo, puedes ejecutar `SistemaCitasMedicas/backend/insertar_medicos.sql`.
 
-### 2. Backend (Node.js)
+### 2. Instalar dependencias
 ```bash
-cd backend
-copy .env.example .env        # Windows
-# Edita .env con tus credenciales de MySQL y JWT_SECRET
 npm install
+```
+
+### 3. Backend (Node.js)
+```bash
+cd SistemaCitasMedicas/backend
+copy .env.example .env        # Windows
+# o: cp .env.example .env     # macOS / Linux
+# Edita .env con tus credenciales de MySQL y JWT_SECRET
 npm run dev                   # Inicia en http://localhost:3001
 ```
 
-### 3. App React Native (Expo)
+### 4. App React Native (Expo)
 ```bash
-# Volver a la raíz del proyecto
+# Si necesitas fijar la URL manualmente, copia:
+cd SistemaCitasMedicas
+copy .env.example .env        # Windows
+# o: cp .env.example .env     # macOS / Linux
+
 npm start
 # Escanea el QR con Expo Go (Android/iOS)
 # o presiona 'w' para abrir en navegador
 ```
 
->  **Si pruebas en dispositivo físico**, cambia `localhost` por la IP de tu PC en `src/services/api.js`.
+> La app intentará detectar automáticamente la IP de Expo. Si pruebas en dispositivo físico y quieres fijarla manualmente, usa `SistemaCitasMedicas/.env`.
 
 ---
 

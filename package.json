@@ -1,0 +1,13 @@
+{
+  "name": "dps-proyecto-de-catedra",
+  "private": true,
+  "scripts": {
+    "install:app": "npm --prefix ./SistemaCitasMedicas install",
+    "install:backend": "npm --prefix ./SistemaCitasMedicas/backend install",
+    "postinstall": "npm run install:app && npm run install:backend",
+    "start": "npm --prefix ./SistemaCitasMedicas run start",
+    "web": "npm --prefix ./SistemaCitasMedicas run web",
+    "backend:start": "npm --prefix ./SistemaCitasMedicas/backend run start",
+    "backend:dev": "npm --prefix ./SistemaCitasMedicas/backend run dev"
+  }
+}

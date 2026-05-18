@@ -57,21 +57,21 @@ const resolveBaseUrl = () => {
             return envAndroidEmulatorUrl || 'http://10.0.2.2:3001/api';
         }
 
-        if (envAndroidDeviceUrl) return envAndroidDeviceUrl;
-        if (envUrl) return envUrl;
-
         if (expoHostIp) {
             return `http://${expoHostIp}:3001/api`;
         }
 
+        if (envAndroidDeviceUrl) return envAndroidDeviceUrl;
+        if (envUrl) return envUrl;
+
         return 'http://10.0.2.2:3001/api';
     }
-
-    if (envUrl) return envUrl;
 
     if (expoHostIp) {
         return `http://${expoHostIp}:3001/api`;
     }
+
+    if (envUrl) return envUrl;
 
     return 'http://localhost:3001/api';
 };
