@@ -6,6 +6,24 @@ const { verifyToken, requireRole } = require('../middleware/auth');
 
 const ADMIN = 1;
 
+const splitNombre = (nombreCompleto = '') => {
+    const limpio = String(nombreCompleto).trim();
+    if (!limpio) return { nombre: '', apellido: '' };
+    const partes = limpio.split(/\s+/);
+    if (partes.length === 1) return { nombre: partes[0], apellido: '' };
+    return { nombre: partes[0], apellido: partes.slice(1).join(' ') };
+};
+
+const generateCodigoDoctor = async () => {
+    for (let i = 0; i < 20; i++) {
+        const random = Math.floor(10000000 + Math.random() * 90000000);
+        const codigo = `D-${random}`;
+        const [[existente]] = await pool.query('SELECT codigo_id FROM doctores WHERE codigo_id = ? LIMIT 1', [codigo]);
+        if (!existente) return codigo;
+    }
+    throw new Error('No se pudo generar codigo de doctor.');
+};
+
 const generarPasswordTemporal = () => {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
     let password = 'Temp';
@@ -18,24 +36,29 @@ const generarPasswordTemporal = () => {
 router.get('/', verifyToken, async (req, res) => {
     try {
         const [rows] = await pool.query(
-            `SELECT m.id_medico, u.id_usuario,
-              CONCAT(u.nombre, ' ', u.apellido) AS nombre_completo,
-              u.nombre,
-              u.apellido,
-              u.username,
-              u.email,
-              e.nombre AS especialidad,
-              m.numero_colegiado,
-              m.telefono,
-              u.activo
-        FROM usuarios u
-        JOIN roles r ON u.id_rol = r.id_rol
-        LEFT JOIN medicos m ON m.id_usuario = u.id_usuario
-        LEFT JOIN especialidades e ON e.id_especialidad = m.id_especialidad
-        WHERE r.nombre_rol = 'medico'
-        ORDER BY e.nombre, u.apellido`
+            `SELECT codigo_id, nombre, username, email, especialidad, disponible_consulta
+             FROM doctores
+             ORDER BY especialidad, nombre`
         );
-        res.json(rows);
+
+        const mapped = rows.map((r) => {
+            const partes = splitNombre(r.nombre);
+            return {
+                id_medico: r.codigo_id,
+                id_usuario: r.codigo_id,
+                nombre_completo: r.nombre,
+                nombre: partes.nombre,
+                apellido: partes.apellido,
+                username: r.username,
+                email: r.email,
+                especialidad: r.especialidad,
+                numero_colegiado: null,
+                telefono: null,
+                activo: r.disponible_consulta ? 1 : 0,
+            };
+        });
+
+        res.json(mapped);
     } catch (error) {
         console.error('Error en GET /medicos:', error);
         res.status(500).json({ message: 'Error interno del servidor.' });
@@ -45,28 +68,28 @@ router.get('/', verifyToken, async (req, res) => {
 router.get('/:id', verifyToken, async (req, res) => {
     try {
         const [[medico]] = await pool.query(
-            `SELECT m.id_medico,
-              CONCAT(u.nombre, ' ', u.apellido) AS nombre_completo,
-              u.email,
-              e.nombre AS especialidad,
-              e.id_especialidad,
-              m.numero_colegiado,
-              m.telefono
-       FROM medicos m
-       JOIN usuarios u ON u.id_usuario = m.id_usuario
-       JOIN especialidades e ON e.id_especialidad = m.id_especialidad
-       WHERE m.id_medico = ? AND u.activo = 1`,
+            `SELECT codigo_id, nombre, email, username, especialidad, hora_libre, disponible_consulta
+             FROM doctores
+             WHERE codigo_id = ?`,
             [req.params.id]
         );
 
         if (!medico) return res.status(404).json({ message: 'Médico no encontrado.' });
 
-        const [horarios] = await pool.query(
-            'SELECT id_horario, dia_semana, hora_inicio, hora_fin FROM horarios_medico WHERE id_medico = ? AND activo = 1',
-            [req.params.id]
-        );
+        const horarios = medico.hora_libre
+            ? [{ id_horario: 1, dia_semana: 'Lunes-Domingo', hora_inicio: medico.hora_libre, hora_fin: medico.hora_libre }]
+            : [];
 
-        res.json({ ...medico, horarios });
+        res.json({
+            id_medico: medico.codigo_id,
+            nombre_completo: medico.nombre,
+            email: medico.email,
+            especialidad: medico.especialidad,
+            id_especialidad: null,
+            numero_colegiado: null,
+            telefono: null,
+            horarios,
+        });
     } catch (error) {
         console.error('Error en GET /medicos/:id:', error);
         res.status(500).json({ message: 'Error interno del servidor.' });
@@ -82,23 +105,30 @@ router.post('/', verifyToken, requireRole([ADMIN]), async (req, res) => {
 
     try {
         const [exist] = await pool.query(
-            'SELECT id_usuario FROM usuarios WHERE email = ? OR username = ?',
-            [email, username]
+            `SELECT codigo_id FROM doctores WHERE email = ? OR username = ?
+             UNION ALL
+             SELECT codigo_id FROM pacientes WHERE email = ? OR username = ?
+             UNION ALL
+             SELECT codigo_id FROM admins WHERE email = ? OR username = ?`,
+            [email, username, email, username, email, username]
         );
         if (exist.length > 0) {
             return res.status(409).json({ message: 'El correo o nombre de usuario ya está registrado.' });
         }
 
         const password_hash = await bcrypt.hash(password, 12);
+        const codigoId = await generateCodigoDoctor();
+        const especialidad = id_especialidad ? String(id_especialidad) : (numero_colegiado ? 'general' : 'general');
 
-        const [result] = await pool.query(
-            'CALL sp_registrar_medico(?, ?, ?, ?, ?, ?, ?, ?)',
-            [nombre, apellido, email, username, password_hash, id_especialidad, numero_colegiado || null, telefono || null]
+        await pool.query(
+            `INSERT INTO doctores (codigo_id, nombre, especialidad, email, username, password, disponible_consulta)
+             VALUES (?, ?, ?, ?, ?, ?, 1)`,
+            [codigoId, `${nombre} ${apellido}`.trim(), especialidad, email, username, password_hash]
         );
 
         res.status(201).json({
             message: 'Médico registrado exitosamente.',
-            id_usuario: result[0][0].nuevo_id_usuario,
+            id_usuario: codigoId,
         });
     } catch (error) {
         console.error('Error en POST /medicos:', error);
@@ -116,30 +146,27 @@ router.put('/:id', verifyToken, requireRole([ADMIN]), async (req, res) => {
 
     try {
         const [exist] = await pool.query(
-            'SELECT id_usuario FROM usuarios WHERE (email = ? OR username = ?) AND id_usuario <> ?',
-            [email.trim(), username.trim(), id]
+            `SELECT codigo_id FROM doctores WHERE (email = ? OR username = ?) AND codigo_id <> ?
+             UNION ALL
+             SELECT codigo_id FROM pacientes WHERE email = ? OR username = ?
+             UNION ALL
+             SELECT codigo_id FROM admins WHERE email = ? OR username = ?`,
+            [email.trim(), username.trim(), id, email.trim(), username.trim(), email.trim(), username.trim()]
         );
         if (exist.length > 0) {
             return res.status(409).json({ message: 'El correo o nombre de usuario ya está en uso.' });
         }
 
         const [result] = await pool.query(
-            `UPDATE usuarios
-             SET nombre = ?, apellido = ?, email = ?, username = ?
-             WHERE id_usuario = ? AND id_rol = (SELECT id_rol FROM roles WHERE nombre_rol = 'medico' LIMIT 1)`,
-            [nombre.trim(), apellido.trim(), email.trim(), username.trim(), id]
+            `UPDATE doctores
+             SET nombre = ?, especialidad = ?, email = ?, username = ?
+             WHERE codigo_id = ?`,
+            [`${nombre.trim()} ${apellido.trim()}`.trim(), String(id_especialidad || numero_colegiado || 'general'), email.trim(), username.trim(), id]
         );
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ message: 'Médico no encontrado.' });
         }
-
-        await pool.query(
-            `UPDATE medicos
-             SET id_especialidad = ?, numero_colegiado = ?, telefono = ?
-             WHERE id_usuario = ?`,
-            [id_especialidad, numero_colegiado?.trim() || null, telefono?.trim() || null, id]
-        );
 
         res.json({ message: 'Médico actualizado correctamente.' });
     } catch (error) {
@@ -156,9 +183,9 @@ router.put('/:id/restaurar-password', verifyToken, requireRole([ADMIN]), async (
         const password_hash = await bcrypt.hash(passwordTemporal, 12);
 
         const [result] = await pool.query(
-            `UPDATE usuarios
-             SET password_hash = ?
-             WHERE id_usuario = ? AND id_rol = (SELECT id_rol FROM roles WHERE nombre_rol = 'medico' LIMIT 1)`,
+            `UPDATE doctores
+             SET password = ?
+             WHERE codigo_id = ?`,
             [password_hash, id]
         );
 
@@ -179,13 +206,17 @@ router.put('/:id/restaurar-password', verifyToken, requireRole([ADMIN]), async (
 router.delete('/:id', verifyToken, requireRole([ADMIN]), async (req, res) => {
     const { id } = req.params;
     try {
-        await pool.query('DELETE FROM citas WHERE id_medico = (SELECT id_medico FROM medicos WHERE id_usuario = ?)', [id]);
+        await pool.query('DELETE FROM citas WHERE doctor_id = ?', [id]);
 
-        const [result] = await pool.query('DELETE FROM usuarios WHERE id_usuario = ? AND id_rol = (SELECT id_rol FROM roles WHERE nombre_rol = "medico" LIMIT 1)', [id]);
+        const [result] = await pool.query('DELETE FROM doctores WHERE codigo_id = ?', [id]);
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ message: 'Médico no encontrado o ya eliminado.' });
         }
+        await pool.query(
+            'INSERT INTO historial_cambios (tipo, descripcion) VALUES (?, ?)',
+            ['ELIMINACION', `El administrador ${req.user.username} ha borrado la cuenta ${id}.`]
+        );
         res.json({ message: 'Médico eliminado permanentemente de la base de datos.' });
     } catch (error) {
         console.error('Error en DELETE /medicos/:id:', error);

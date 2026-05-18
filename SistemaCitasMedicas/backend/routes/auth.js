@@ -5,6 +5,96 @@ const jwt = require('jsonwebtoken');
 const pool = require('../config/db');
 const { verifyToken } = require('../middleware/auth');
 
+const ROLES = {
+    ADMIN: { id: 1, nombre: 'administrador', tabla: 'admins', prefijo: 'A' },
+    MEDICO: { id: 2, nombre: 'medico', tabla: 'doctores', prefijo: 'D' },
+    CLIENTE: { id: 3, nombre: 'cliente', tabla: 'pacientes', prefijo: 'P' },
+};
+
+const splitNombre = (nombreCompleto = '') => {
+    const limpio = String(nombreCompleto).trim();
+    if (!limpio) return { nombre: '', apellido: '' };
+    const partes = limpio.split(/\s+/);
+    if (partes.length === 1) return { nombre: partes[0], apellido: '' };
+    return { nombre: partes[0], apellido: partes.slice(1).join(' ') };
+};
+
+const generateCodigo = async (prefijo, tabla) => {
+    for (let i = 0; i < 20; i++) {
+        const random = Math.floor(10000000 + Math.random() * 90000000);
+        const codigo = `${prefijo}-${random}`;
+        const [[existente]] = await pool.query(
+            `SELECT codigo_id FROM ${tabla} WHERE codigo_id = ? LIMIT 1`,
+            [codigo]
+        );
+        if (!existente) return codigo;
+    }
+    throw new Error('No se pudo generar un codigo unico.');
+};
+
+const findUserByLogin = async (credential) => {
+    const [rows] = await pool.query(
+        `SELECT codigo_id AS id_usuario, nombre, email, username, password,
+                'cliente' AS rol, 3 AS id_rol
+         FROM pacientes
+         WHERE username = ? OR email = ?
+         UNION ALL
+         SELECT codigo_id AS id_usuario, nombre, email, username, password,
+                'medico' AS rol, 2 AS id_rol
+         FROM doctores
+         WHERE username = ? OR email = ?
+         UNION ALL
+         SELECT codigo_id AS id_usuario, NULL AS nombre, email, username, password,
+                'administrador' AS rol, 1 AS id_rol
+         FROM admins
+         WHERE username = ? OR email = ?
+         LIMIT 1`,
+        [credential, credential, credential, credential, credential, credential]
+    );
+
+    return rows[0] || null;
+};
+
+const usernameExists = async (username, currentRole, currentId) => {
+    const [rows] = await pool.query(
+        `SELECT codigo_id FROM pacientes WHERE username = ?
+         UNION ALL
+         SELECT codigo_id FROM doctores WHERE username = ?
+         UNION ALL
+         SELECT codigo_id FROM admins WHERE username = ?`,
+        [username, username, username]
+    );
+
+    if (rows.length === 0) return false;
+    if (!currentRole || !currentId) return true;
+
+    if (currentRole === ROLES.CLIENTE.nombre) {
+        return rows.some((r) => r.codigo_id !== currentId);
+    }
+    if (currentRole === ROLES.MEDICO.nombre) {
+        return rows.some((r) => r.codigo_id !== currentId);
+    }
+    if (currentRole === ROLES.ADMIN.nombre) {
+        return rows.some((r) => r.codigo_id !== currentId);
+    }
+    return true;
+};
+
+const emailExists = async (email, currentRole, currentId) => {
+    const [rows] = await pool.query(
+        `SELECT codigo_id FROM pacientes WHERE email = ?
+         UNION ALL
+         SELECT codigo_id FROM doctores WHERE email = ?
+         UNION ALL
+         SELECT codigo_id FROM admins WHERE email = ?`,
+        [email, email, email]
+    );
+
+    if (rows.length === 0) return false;
+    if (!currentRole || !currentId) return true;
+    return rows.some((r) => r.codigo_id !== currentId);
+};
+
 router.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
@@ -13,39 +103,24 @@ router.post('/login', async (req, res) => {
     }
 
     try {
-                const [rows] = await pool.query(
-                        `SELECT u.id_usuario, u.nombre, u.apellido, u.email,
-                            u.username, u.password_hash, u.activo,
-                            r.id_rol, r.nombre_rol
-             FROM usuarios u
-             JOIN roles r ON r.id_rol = u.id_rol
-             WHERE u.username = ? OR u.email = ?`,
-                        [username, username]
-                );
-
-        if (rows.length === 0) {
+        const user = await findUserByLogin(username.trim());
+        if (!user) {
             return res.status(401).json({ message: 'Credenciales incorrectas.' });
         }
 
-        const user = rows[0];
-
-        if (!user.activo) {
-            return res.status(403).json({ message: 'Cuenta desactivada. Contacta al administrador.' });
-        }
-
-        const passwordValida = await bcrypt.compare(password, user.password_hash);
+        const passwordValida = await bcrypt.compare(password, user.password);
         if (!passwordValida) {
             return res.status(401).json({ message: 'Credenciales incorrectas.' });
         }
 
-        await pool.query('UPDATE usuarios SET ultimo_acceso = NOW() WHERE id_usuario = ?', [user.id_usuario]);
+        const { nombre, apellido } = splitNombre(user.nombre || (user.rol === 'administrador' ? 'Administrador' : ''));
 
         const token = jwt.sign(
             {
                 id_usuario: user.id_usuario,
                 id_rol: user.id_rol,
                 username: user.username,
-                nombre_rol: user.nombre_rol,
+                nombre_rol: user.rol,
             },
             process.env.JWT_SECRET,
             { expiresIn: process.env.JWT_EXPIRES_IN || '8h' }
@@ -55,11 +130,11 @@ router.post('/login', async (req, res) => {
             token,
             user: {
                 id_usuario: user.id_usuario,
-                nombre: user.nombre,
-                apellido: user.apellido,
+                nombre,
+                apellido,
                 email: user.email,
                 username: user.username,
-                rol: user.nombre_rol,
+                rol: user.rol,
                 id_rol: user.id_rol,
             },
         });
@@ -70,7 +145,7 @@ router.post('/login', async (req, res) => {
 });
 
 router.post('/register', async (req, res) => {
-    const { nombre, apellido, email, username, password, telefono, fecha_nacimiento } = req.body;
+    const { nombre, apellido, email, username, password, telefono } = req.body;
 
     if (!nombre || !apellido || !email || !username || !password) {
         return res.status(400).json({ message: 'Todos los campos obligatorios deben ser completados.' });
@@ -81,26 +156,32 @@ router.post('/register', async (req, res) => {
     }
 
     try {
-        const [exist] = await pool.query(
-            'SELECT id_usuario FROM usuarios WHERE email = ? OR username = ?',
-            [email, username]
-        );
-        if (exist.length > 0) {
+        if (await emailExists(email.trim().toLowerCase())) {
+            return res.status(409).json({ message: 'El correo ya está registrado.' });
+        }
+        if (await usernameExists(username.trim().toLowerCase())) {
             return res.status(409).json({ message: 'El correo o nombre de usuario ya está registrado.' });
         }
 
-        const password_hash = await bcrypt.hash(password, 12);
+        const passwordHash = await bcrypt.hash(password, 12);
+        const codigoId = await generateCodigo(ROLES.CLIENTE.prefijo, ROLES.CLIENTE.tabla);
 
-        const [result] = await pool.query(
-            'CALL sp_registrar_cliente(?, ?, ?, ?, ?, ?, ?)',
-            [nombre, apellido, email, username, password_hash, telefono || null, fecha_nacimiento || null]
+        await pool.query(
+            `INSERT INTO pacientes (codigo_id, nombre, telefono, email, username, password)
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [
+                codigoId,
+                `${nombre.trim()} ${apellido.trim()}`.trim(),
+                telefono?.trim() || null,
+                email.trim().toLowerCase(),
+                username.trim(),
+                passwordHash,
+            ]
         );
-
-        const nuevo_id = result[0][0].nuevo_id_usuario;
 
         res.status(201).json({
             message: 'Cuenta creada exitosamente.',
-            id_usuario: nuevo_id,
+            id_usuario: codigoId,
         });
     } catch (error) {
         console.error('Error en /register:', error);
@@ -111,42 +192,56 @@ router.post('/register', async (req, res) => {
 router.put('/me', verifyToken, async (req, res) => {
     const { nombre, apellido, username, current_password, new_password } = req.body;
     const id_usuario = req.user.id_usuario;
+    const rol = req.user.nombre_rol;
 
     if (!nombre && !apellido && !username && !new_password) {
         return res.status(400).json({ message: 'No se enviaron campos para actualizar.' });
     }
 
     try {
-        const [[usuarioActual]] = await pool.query(
-            `SELECT u.id_usuario, u.nombre, u.apellido, u.email, u.username, u.password_hash,
-                    u.id_rol, r.nombre_rol
-             FROM usuarios u
-             JOIN roles r ON r.id_rol = u.id_rol
-             WHERE u.id_usuario = ?`,
-            [id_usuario]
-        );
+        let usuarioActual = null;
+        let tabla = null;
+
+        if (rol === ROLES.CLIENTE.nombre) {
+            tabla = 'pacientes';
+            const [[row]] = await pool.query(
+                'SELECT codigo_id AS id_usuario, nombre, email, username, password FROM pacientes WHERE codigo_id = ?',
+                [id_usuario]
+            );
+            usuarioActual = row || null;
+        } else if (rol === ROLES.MEDICO.nombre) {
+            tabla = 'doctores';
+            const [[row]] = await pool.query(
+                'SELECT codigo_id AS id_usuario, nombre, email, username, password FROM doctores WHERE codigo_id = ?',
+                [id_usuario]
+            );
+            usuarioActual = row || null;
+        } else if (rol === ROLES.ADMIN.nombre) {
+            tabla = 'admins';
+            const [[row]] = await pool.query(
+                'SELECT codigo_id AS id_usuario, NULL AS nombre, email, username, password FROM admins WHERE codigo_id = ?',
+                [id_usuario]
+            );
+            usuarioActual = row || null;
+        }
 
         if (!usuarioActual) {
             return res.status(404).json({ message: 'Usuario no encontrado.' });
         }
 
         if (username && username !== usuarioActual.username) {
-            const [usernameExist] = await pool.query(
-                'SELECT id_usuario FROM usuarios WHERE username = ? AND id_usuario <> ?',
-                [username.trim(), id_usuario]
-            );
-            if (usernameExist.length > 0) {
+            if (await usernameExists(username.trim(), rol, id_usuario)) {
                 return res.status(409).json({ message: 'El nombre de usuario ya está en uso.' });
             }
         }
 
-        let password_hash = usuarioActual.password_hash;
+        let passwordHash = usuarioActual.password;
         if (new_password) {
             if (!current_password) {
                 return res.status(400).json({ message: 'Debes proporcionar tu contraseña actual.' });
             }
 
-            const passwordValida = await bcrypt.compare(current_password, usuarioActual.password_hash);
+            const passwordValida = await bcrypt.compare(current_password, usuarioActual.password);
             if (!passwordValida) {
                 return res.status(401).json({ message: 'La contraseña actual es incorrecta.' });
             }
@@ -155,19 +250,29 @@ router.put('/me', verifyToken, async (req, res) => {
                 return res.status(400).json({ message: 'La nueva contraseña debe tener al menos 8 caracteres.' });
             }
 
-            password_hash = await bcrypt.hash(new_password, 12);
+            passwordHash = await bcrypt.hash(new_password, 12);
         }
 
-        const nuevoNombre = nombre ? nombre.trim() : usuarioActual.nombre;
-        const nuevoApellido = apellido ? apellido.trim() : usuarioActual.apellido;
+        const nombreActual = usuarioActual.nombre || (rol === ROLES.ADMIN.nombre ? 'Administrador' : '');
+        const partesActuales = splitNombre(nombreActual);
+        const nuevoNombre = nombre ? nombre.trim() : partesActuales.nombre;
+        const nuevoApellido = apellido ? apellido.trim() : partesActuales.apellido;
         const nuevoUsername = username ? username.trim() : usuarioActual.username;
+        const nombreCompleto = `${nuevoNombre} ${nuevoApellido}`.trim();
 
-        await pool.query(
-            `UPDATE usuarios
-             SET nombre = ?, apellido = ?, username = ?, password_hash = ?
-             WHERE id_usuario = ?`,
-            [nuevoNombre, nuevoApellido, nuevoUsername, password_hash, id_usuario]
-        );
+        if (tabla === 'admins') {
+            await pool.query(
+                'UPDATE admins SET username = ?, password = ? WHERE codigo_id = ?',
+                [nuevoUsername, passwordHash, id_usuario]
+            );
+        } else {
+            await pool.query(
+                `UPDATE ${tabla}
+                 SET nombre = ?, username = ?, password = ?
+                 WHERE codigo_id = ?`,
+                [nombreCompleto, nuevoUsername, passwordHash, id_usuario]
+            );
+        }
 
         res.json({
             message: 'Cuenta actualizada correctamente.',
@@ -177,8 +282,8 @@ router.put('/me', verifyToken, async (req, res) => {
                 apellido: nuevoApellido,
                 email: usuarioActual.email,
                 username: nuevoUsername,
-                rol: usuarioActual.nombre_rol,
-                id_rol: usuarioActual.id_rol,
+                rol,
+                id_rol: req.user.id_rol,
             },
         });
     } catch (error) {
@@ -189,7 +294,7 @@ router.put('/me', verifyToken, async (req, res) => {
 
 router.delete('/me', verifyToken, async (req, res) => {
     const { password } = req.body;
-    const { id_usuario, id_rol } = req.user;
+    const { id_usuario, id_rol, username, nombre_rol } = req.user;
 
     if (id_rol === 1) {
         return res.status(403).json({ message: 'La cuenta administrador no puede eliminarse.' });
@@ -200,29 +305,46 @@ router.delete('/me', verifyToken, async (req, res) => {
     }
 
     try {
-        const [[usuarioActual]] = await pool.query(
-            'SELECT id_usuario, password_hash FROM usuarios WHERE id_usuario = ?',
+        let usuarioActual = null;
+        let tabla = null;
+        if (id_rol === ROLES.MEDICO.id) {
+            tabla = 'doctores';
+        } else if (id_rol === ROLES.CLIENTE.id) {
+            tabla = 'pacientes';
+        }
+
+        if (!tabla) {
+            return res.status(400).json({ message: 'Rol no soportado para eliminación.' });
+        }
+
+        const [[row]] = await pool.query(
+            `SELECT codigo_id, password FROM ${tabla} WHERE codigo_id = ?`,
             [id_usuario]
         );
+        usuarioActual = row || null;
 
         if (!usuarioActual) {
             return res.status(404).json({ message: 'Usuario no encontrado.' });
         }
 
-        const passwordValida = await bcrypt.compare(password, usuarioActual.password_hash);
+        const passwordValida = await bcrypt.compare(password, usuarioActual.password);
         if (!passwordValida) {
             return res.status(401).json({ message: 'Contraseña incorrecta.' });
         }
 
-        if (id_rol === 2) {
-            await pool.query('DELETE FROM citas WHERE id_medico = (SELECT id_medico FROM medicos WHERE id_usuario = ?)', [id_usuario]);
+        if (id_rol === ROLES.MEDICO.id) {
+            await pool.query('DELETE FROM citas WHERE doctor_id = ?', [id_usuario]);
         }
 
-        if (id_rol === 3) {
-            await pool.query('DELETE FROM citas WHERE id_cliente = (SELECT id_cliente FROM clientes WHERE id_usuario = ?)', [id_usuario]);
+        if (id_rol === ROLES.CLIENTE.id) {
+            await pool.query('DELETE FROM citas WHERE paciente_id = ?', [id_usuario]);
         }
 
-        await pool.query('DELETE FROM usuarios WHERE id_usuario = ?', [id_usuario]);
+        await pool.query(`DELETE FROM ${tabla} WHERE codigo_id = ?`, [id_usuario]);
+        await pool.query(
+            'INSERT INTO historial_cambios (tipo, descripcion) VALUES (?, ?)',
+            ['ELIMINACION', `Usuario ${id_usuario} (@${username}) con rol ${nombre_rol} eliminó su cuenta.`]
+        );
 
         res.json({ message: 'Tu cuenta fue eliminada correctamente.' });
     } catch (error) {
