@@ -15,6 +15,7 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.citasmed.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -24,6 +25,14 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "a9b30622-5fa1-469b-b278-e8e5bf66b096"
+      }
+    },
+    "plugins": [
+      "@react-native-community/datetimepicker"
+    ]
   }
 }
