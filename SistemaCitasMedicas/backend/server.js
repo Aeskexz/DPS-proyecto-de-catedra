@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
 
@@ -15,12 +16,9 @@ app.use('/api/clientes', require('./routes/clientes'));
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date() }));
 
-app.use((req, res) => res.status(404).json({ message: 'Ruta no encontrada.' }));
+app.use((req, res) => res.status(404).json({ success: false, error: 'Ruta no encontrada.' }));
 
-app.use((err, req, res, next) => {
-    console.error('Error no manejado:', err);
-    res.status(500).json({ message: 'Error interno del servidor.' });
-});
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

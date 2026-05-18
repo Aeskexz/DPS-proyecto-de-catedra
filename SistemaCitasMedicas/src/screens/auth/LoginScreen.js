@@ -10,18 +10,21 @@ const LoginScreen = ({ navigation }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
 
     const handleLogin = async () => {
+        setError('');
+
         if (!username.trim() || !password.trim()) {
-            Alert.alert('Campos requeridos', 'Por favor ingresa tu usuario y contraseña.');
+            setError('Por favor ingresa tu usuario y contraseña.');
             return;
         }
 
         setLoading(true);
         try {
             await login(username.trim(), password);
-        } catch (error) {
-            Alert.alert('Error al iniciar sesión', error.message || 'Credenciales incorrectas');
+        } catch (err) {
+            setError(err.message || 'Credenciales incorrectas. Intenta de nuevo.');
         } finally {
             setLoading(false);
         }
@@ -45,6 +48,13 @@ const LoginScreen = ({ navigation }) => {
 
                     {/* Formulario */}
                     <View style={styles.form}>
+                        {error ? (
+                            <View style={styles.errorBox}>
+                                <Text style={styles.errorIcon}>⚠</Text>
+                                <Text style={styles.errorText}>{error}</Text>
+                            </View>
+                        ) : null}
+
                         <Text style={styles.label}>Usuario o Correo</Text>
                         <TextInput
                             style={styles.input}
@@ -116,7 +126,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         borderRadius: 24,
         padding: 32,
-        // Sombras
         elevation: 8,
         shadowColor: '#1E3A5F',
         shadowOpacity: 0.1,
@@ -154,6 +163,28 @@ const styles = StyleSheet.create({
     },
     form: {
         width: '100%',
+    },
+    errorBox: {
+        backgroundColor: '#FEE2E2',
+        borderLeftWidth: 4,
+        borderLeftColor: '#EF4444',
+        borderRadius: 8,
+        padding: 12,
+        marginBottom: 20,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+    },
+    errorIcon: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#DC2626',
+    },
+    errorText: {
+        flex: 1,
+        color: '#991B1B',
+        fontSize: 14,
+        fontWeight: '500',
     },
     label: {
         fontSize: 12,

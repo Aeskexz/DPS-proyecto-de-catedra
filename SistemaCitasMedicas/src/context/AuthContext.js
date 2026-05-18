@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authService } from '../services/api';
@@ -6,11 +5,10 @@ import { authService } from '../services/api';
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);       
+    const [user, setUser] = useState(null);
     const [token, setToken] = useState(null);
-    const [loading, setLoading] = useState(true); 
+    const [loading, setLoading] = useState(true);
 
-   
     useEffect(() => {
         const restoreSession = async () => {
             try {
@@ -29,12 +27,6 @@ export const AuthProvider = ({ children }) => {
         restoreSession();
     }, []);
 
-    /**
-     * 
-      @param {string} username
-      @param {string} password
-      @returns {Promise<{ user, token }>}
-     */
     const login = async (username, password) => {
         const response = await authService.login(username, password);
         const { token: newToken, user: newUser } = response;
@@ -48,9 +40,6 @@ export const AuthProvider = ({ children }) => {
         return response;
     };
 
-    /**
-    
-     */
     const updateMiCuenta = async (datos) => {
         const response = await authService.updateMiCuenta(datos);
         if (response?.user) {
@@ -60,16 +49,12 @@ export const AuthProvider = ({ children }) => {
         return response;
     };
 
-    /**
-     
-     */
     const eliminarMiCuenta = async (password) => {
         const response = await authService.eliminarMiCuenta(password);
         await logout();
         return response;
     };
 
-   
     const logout = async () => {
         try {
             await AsyncStorage.removeItem('token');
@@ -81,14 +66,25 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
     };
 
-    /**
-   
-     * @param {'administrador'|'medico'|'cliente'} rol
-     */
     const isRole = (rol) => user?.rol === rol;
 
+    const handleTokenExpired = async () => {
+        console.log('[Auth] Token expirado detectado, cerrando sesión');
+        await logout();
+    };
+
     return (
-        <AuthContext.Provider value={{ user, token, loading, login, logout, updateMiCuenta, eliminarMiCuenta, isRole }}>
+        <AuthContext.Provider value={{
+            user,
+            token,
+            loading,
+            login,
+            logout,
+            updateMiCuenta,
+            eliminarMiCuenta,
+            isRole,
+            handleTokenExpired
+        }}>
             {children}
         </AuthContext.Provider>
     );

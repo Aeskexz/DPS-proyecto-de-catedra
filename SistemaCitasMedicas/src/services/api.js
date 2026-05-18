@@ -131,14 +131,21 @@ api.interceptors.response.use(
                     return retriedResponse;
                 } catch (fallbackError) {
                     if (fallbackError?.response) {
-                        const mensajeRespuesta = fallbackError.response?.data?.message || 'Error en solicitud.';
+                        const mensajeRespuesta = fallbackError.response?.data?.error || fallbackError.response?.data?.message || 'Error en solicitud.';
                         return Promise.reject(new Error(mensajeRespuesta));
                     }
                 }
             }
         }
 
-        const mensaje = error.response?.data?.message || 'Error de conexión. Intenta de nuevo.';
+        const statusCode = error.response?.status;
+        const errorData = error.response?.data;
+        const mensaje = errorData?.error || errorData?.message || 'Error de conexión. Intenta de nuevo.';
+
+        if (statusCode === 401) {
+            console.log('[API] Token expirado o no válido');
+        }
+
         return Promise.reject(new Error(mensaje));
     }
 );

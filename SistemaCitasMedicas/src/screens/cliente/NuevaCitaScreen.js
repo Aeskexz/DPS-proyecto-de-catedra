@@ -20,6 +20,7 @@ const NuevaCitaScreen = ({ navigation, route }) => {
     const [motivo, setMotivo] = useState('');
     const [loading, setLoading] = useState(false);
     const [cargandoMedicos, setCargandoMedicos] = useState(true);
+    const [error, setError] = useState('');
 
     // Horas disponibles para días de semana (Lunes - Viernes): 7:00 AM - 5:00 PM
     const horasDiasSemana = [
@@ -108,24 +109,36 @@ const NuevaCitaScreen = ({ navigation, route }) => {
     };
 
     const handleCrearCita = async () => {
+        setError('');
+
+        if (!medicoSeleccionado) {
+            setError('Por favor selecciona un especialista.');
+            return;
+        }
+
+        if (!fechaTexto) {
+            setError('Por favor selecciona una fecha para la cita.');
+            return;
+        }
+
         if (fechaTexto) {
             const fecha = new Date(fechaTexto + 'T00:00:00');
             const year = fecha.getFullYear();
 
             if (year !== 2026) {
-                Alert.alert('Año no válido', 'Las citas solo se pueden agendar para el año 2026.');
+                setError('Las citas solo se pueden agendar para el año 2026.');
                 return;
             }
 
             const diaSemana = fecha.getDay();
             if (diaSemana === 0) {
-                Alert.alert('Día no disponible', 'Los domingos no hay atención. Por favor selecciona otro día.');
+                setError('Los domingos no hay atención. Por favor selecciona otro día.');
                 return;
             }
         }
 
-        if (!medicoSeleccionado || !fechaTexto || !hora) {
-            Alert.alert('Campos requeridos', 'Selecciona médico, fecha y hora.');
+        if (!hora) {
+            setError('Por favor selecciona una hora para la cita.');
             return;
         }
 
@@ -144,8 +157,8 @@ const NuevaCitaScreen = ({ navigation, route }) => {
                     onPress: () => navigation.goBack(),
                 },
             ]);
-        } catch (error) {
-            Alert.alert('Error al crear cita', error.message);
+        } catch (err) {
+            setError(err.message || 'Error al crear la cita. Intenta de nuevo.');
         } finally {
             setLoading(false);
         }
@@ -185,6 +198,13 @@ const NuevaCitaScreen = ({ navigation, route }) => {
 
             <View style={styles.formCard}>
                 <Text style={styles.seccionTitulo}>2. Detalles de la cita</Text>
+
+                {error ? (
+                    <View style={styles.errorBox}>
+                        <Text style={styles.errorIcon}>⚠</Text>
+                        <Text style={styles.errorText}>{error}</Text>
+                    </View>
+                ) : null}
 
                 <View style={styles.inputGroup}>
                     <Text style={styles.label}>Fecha de la Cita</Text>
@@ -376,14 +396,35 @@ const styles = StyleSheet.create({
     textoBlanco: { color: '#fff' },
     textoAzulClaro: { color: '#93C5FD' },
     formCard: { backgroundColor: '#fff', borderRadius: 20, padding: 20, marginBottom: 20, elevation: 2 },
+    errorBox: {
+        backgroundColor: '#FEE2E2',
+        borderLeftWidth: 4,
+        borderLeftColor: '#EF4444',
+        borderRadius: 8,
+        padding: 12,
+        marginBottom: 16,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+    },
+    errorIcon: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#DC2626',
+    },
+    errorText: {
+        flex: 1,
+        color: '#991B1B',
+        fontSize: 13,
+        fontWeight: '500',
+    },
     inputGroup: { marginBottom: 18 },
     label: { fontSize: 13, fontWeight: '700', color: '#475569', marginBottom: 8, textTransform: 'uppercase' },
     input: { borderWidth: 1.5, borderColor: '#F1F5F9', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, fontSize: 15, backgroundColor: '#F8FAFC' },
-    // Estilo para el selector de fecha
-    inputPicker: { 
+    inputPicker: {
         flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-        borderWidth: 1.5, borderColor: '#F1F5F9', borderRadius: 12, 
-        paddingHorizontal: 16, paddingVertical: 14, backgroundColor: '#F8FAFC' 
+        borderWidth: 1.5, borderColor: '#F1F5F9', borderRadius: 12,
+        paddingHorizontal: 16, paddingVertical: 14, backgroundColor: '#F8FAFC'
     },
     inputText: { fontSize: 15, color: '#1E293B', fontWeight: '600' },
     placeholderText: { fontSize: 15, color: '#94A3B8' },
