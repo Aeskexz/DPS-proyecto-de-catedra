@@ -48,40 +48,22 @@ const GestionMedicos = ({ navigation, route }) => {
     }, [busqueda, medicos]);
 
     const desactivar = (id, nombre) => {
-<<<<<<< HEAD
-        Alert.alert(
-            'Desactivar médico',
-            `¿Estás seguro de desactivar al Dr. ${nombre}?\n\nSus citas pendientes serán canceladas.`,
-            [
-                { text: 'Cancelar', style: 'cancel' },
-                {
-                    text: 'Desactivar', 
-                    style: 'destructive',
-                    onPress: async () => {
-                        try {
-                            await medicosService.eliminar(id);
-                            Alert.alert('Médico desactivado', `El Dr. ${nombre} ha sido desactivado.`);
-                            if (route.params?.onVolver) route.params.onVolver();
-                            cargar();
-                        } catch (e) { 
-                            Alert.alert('Error', e.message); 
-                        }
-                    },
-=======
-        Alert.alert('Desactivar medico', `Desactivar a ${nombre}?`, [
+        Alert.alert('Desactivar médico', `Desactivar a ${nombre}?`, [
             { text: 'Cancelar', style: 'cancel' },
             {
-                text: 'Desactivar', style: 'destructive',
+                text: 'Desactivar', 
+                style: 'destructive',
                 onPress: async () => {
                     try {
                         await eliminarMedico(id);
                         if (route.params?.onVolver) route.params.onVolver();
                         cargar();
-                    } catch (e) { Alert.alert('Error', e.message); }
->>>>>>> ed7bd74 (ahora la base de datos esta con firebase)
+                    } catch (e) { 
+                        Alert.alert('Error', e.message); 
+                    }
                 },
-            ]
-        );
+            },
+        ]);
     };
 
     const verDetalle = (medico) => {
@@ -109,7 +91,6 @@ const GestionMedicos = ({ navigation, route }) => {
         <SafeAreaView style={styles.container} edges={['top']}>
             {/* Header */}
             <View style={styles.header}>
-<<<<<<< HEAD
                 <View style={styles.headerTop}>
                     <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
                         <Text style={styles.backIcon}>←</Text>
@@ -144,22 +125,12 @@ const GestionMedicos = ({ navigation, route }) => {
                         </TouchableOpacity>
                     ) : null}
                 </View>
-=======
-                <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <Text style={styles.back}>{'<- Volver'}</Text>
-                </TouchableOpacity>
-                <Text style={styles.titulo}>Medicos Activos</Text>
-                <TouchableOpacity onPress={() => navigation.navigate('RegistrarMedico', { onVolver: cargar })}>
-                    <Text style={styles.nuevo}>+ Nuevo</Text>
-                </TouchableOpacity>
->>>>>>> ed7bd74 (ahora la base de datos esta con firebase)
             </View>
 
             {/* Lista */}
             <FlatList
-<<<<<<< HEAD
                 data={medicosFiltrados}
-                keyExtractor={(item) => String(item.id_medico)}
+                keyExtractor={(item) => String(item.id)}
                 contentContainerStyle={[
                     styles.lista,
                     { paddingHorizontal: horizontalPadding }
@@ -180,7 +151,7 @@ const GestionMedicos = ({ navigation, route }) => {
                     >
                         <View style={styles.cardHeader}>
                             <View style={styles.medicoInfo}>
-                                <Text style={styles.nombre}>{item.nombre_completo}</Text>
+                                <Text style={styles.nombre}>{item.nombre_completo || item.displayName}</Text>
                                 <View style={styles.especialidadBadge}>
                                     <Text style={styles.especialidadText}>{item.especialidad}</Text>
                                 </View>
@@ -212,19 +183,6 @@ const GestionMedicos = ({ navigation, route }) => {
                             ) : null}
                         </View>
 
-=======
-                data={medicos}
-                keyExtractor={(item) => String(item.id)}
-                contentContainerStyle={{ paddingHorizontal: horizontalPadding, paddingBottom: 32 }}
-                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); cargar(); }} />}
-                renderItem={({ item }) => (
-                    <View style={[styles.card, { maxWidth: contentMaxWidth, alignSelf: 'center' }]}>
-                        <Text style={styles.nombre}>{item.nombre_completo || item.displayName}</Text>
-                        <Text style={styles.esp}>{item.especialidad}</Text>
-                        <Text style={styles.info}>{item.email}</Text>
-                        {item.telefono ? <Text style={styles.info}>{item.telefono}</Text> : null}
-                        {item.numero_colegiado ? <Text style={styles.info}>Colegiado: {item.numero_colegiado}</Text> : null}
->>>>>>> ed7bd74 (ahora la base de datos esta con firebase)
                         <TouchableOpacity
                             style={styles.desactivarBtn}
                             onPress={() => desactivar(item.id, item.nombre_completo || item.displayName)}
@@ -233,7 +191,6 @@ const GestionMedicos = ({ navigation, route }) => {
                         </TouchableOpacity>
                     </TouchableOpacity>
                 )}
-<<<<<<< HEAD
                 ListEmptyComponent={
                     <View style={styles.emptyContainer}>
                         <Text style={styles.emptyTitle}>
@@ -271,9 +228,6 @@ const GestionMedicos = ({ navigation, route }) => {
                     ) : null
                 }
                 showsVerticalScrollIndicator={false}
-=======
-                ListEmptyComponent={<Text style={styles.vacio}>No hay medicos registrados.</Text>}
->>>>>>> ed7bd74 (ahora la base de datos esta con firebase)
             />
         </SafeAreaView>
     );
