@@ -47,7 +47,7 @@ SistemaCitasMedicas/
 ##  Cómo Arrancar el Proyecto
 
 ### 1. Base de Datos
-Importa el script SQL en PhpMyAdmin (archivo `database.sql` en la raíz del repo).
+Importa el script SQL en PhpMyAdmin para la base `investigacion_descriptiva` (archivo `backend/insertar_medicos.sql`).
 
 ### 2. Backend (Node.js)
 ```bash

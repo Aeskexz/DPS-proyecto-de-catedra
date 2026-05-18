@@ -1,0 +1,11 @@
+{
+  "name": "DPS-proyecto-de-catedra",
+  "private": true,
+  "scripts": {
+    "install:app": "cd SistemaCitasMedicas && npm install",
+    "install:backend": "cd SistemaCitasMedicas/backend && npm install",
+    "start": "cd SistemaCitasMedicas && npm start",
+    "dev": "cd SistemaCitasMedicas && npm run dev",
+    "backend:dev": "cd SistemaCitasMedicas/backend && npm run dev"
+  }
+}

@@ -1,4 +1,4 @@
-USE sistema_citas_medicas;
+USE investigacion_descriptiva;
 
 UPDATE usuarios
 SET password_hash = '$2a$12$NSHc.yCn5seyjkgx7.WZa.TOhYdX8Y1hyXRLJ.iM3WGcNA/X5GE7q'
