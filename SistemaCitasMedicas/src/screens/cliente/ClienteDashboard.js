@@ -1,14 +1,14 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
     View, Text, FlatList, TouchableOpacity,
-    StyleSheet, ActivityIndicator, Alert, RefreshControl, useWindowDimensions, SafeAreaView
+    StyleSheet, ActivityIndicator, Alert, RefreshControl, useWindowDimensions
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../../context/AuthContext';
-import { citasService } from '../../services/api';
+import { escucharCitas } from '../../services/firestore-crud';
 import { getResponsive } from '../../utils/responsive';
 
-// Colores profesionales para estados (manteniendo tu paleta)
+// Mantenemos tus colores originales para evitar conflictos
 const colorEstado = {
     pendiente: { bg: '#FEF3C7', text: '#92400E', border: '#F59E0B' },
     confirmada: { bg: '#D1FAE5', text: '#065F46', border: '#10B981' },
@@ -48,13 +48,8 @@ const CitaCard = ({ cita }) => {
             </View>
             
             <View style={styles.cardBody}>
-                <View style={styles.fechaContainer}>
-                    <Text style={styles.fechaIcono}>📅</Text>
-                    <View>
-                        <Text style={styles.fechaCompleta}>{fechaFormateada}</Text>
-                        <Text style={styles.horaTexto}>{horaFormateada} horas</Text>
-                    </View>
-                </View>
+                <Text style={styles.cardFechaLabel}>Fecha y Hora:</Text>
+                <Text style={styles.cardFechaValue}>{cita.fecha_cita}  •  {cita.hora_cita?.slice(0, 5)}</Text>
                 
                 {cita.motivo_consulta ? (
                     <View style={styles.motivoContainer}>
@@ -80,20 +75,23 @@ const ClienteDashboard = ({ navigation }) => {
     const [refreshing, setRefreshing] = useState(false);
     const [vistaActiva, setVistaActiva] = useState('proximas'); // 'proximas' o 'pasadas'
 
-    const cargarCitas = useCallback(async () => {
-        try {
-            const data = await citasService.getMisCitas();
+    const cargarCitas = useCallback(() => {
+        const unsub = escucharCitas(user?.uid, (data) => {
             setCitas(data);
-        } catch (error) {
-            Alert.alert('Error', error.message);
-        } finally {
             setLoading(false);
             setRefreshing(false);
-        }
-    }, []);
+        });
+        return unsub;
+    }, [user?.uid]);
 
-    useEffect(() => { cargarCitas(); }, [cargarCitas]);
+    useEffect(() => {
+        const unsub = cargarCitas();
+        return () => {
+            if (unsub) unsub();
+        };
+    }, [cargarCitas]);
 
+    // Recargar citas cuando la pantalla recupera el foco (al volver de NuevaCita)
     useFocusEffect(
         useCallback(() => {
             cargarCitas();
@@ -101,13 +99,6 @@ const ClienteDashboard = ({ navigation }) => {
     );
 
     const onRefresh = () => { setRefreshing(true); cargarCitas(); };
-
-    // Separar citas próximas y pasadas
-    const hoy = new Date().toISOString().split('T')[0];
-    const citasProximas = citas.filter(c => c.fecha_cita >= hoy && c.estado !== 'cancelada' && c.estado !== 'completada');
-    const citasPasadas = citas.filter(c => c.fecha_cita < hoy || c.estado === 'cancelada' || c.estado === 'completada');
-
-    const citasAMostrar = vistaActiva === 'proximas' ? citasProximas : citasPasadas;
 
     if (loading) {
         return (
@@ -120,12 +111,12 @@ const ClienteDashboard = ({ navigation }) => {
 
     return (
         <View style={styles.container}>
-            {/* Header mejorado */}
+            {/* Header mejorado visualmente */}
             <View style={styles.header}>
                 <View style={[styles.headerTop, isMobile && styles.headerTopMobile]}>
                     <View>
-                        <Text style={styles.saludo}>Bienvenido de nuevo,</Text>
-                        <Text style={styles.bienvenida}>{user.nombre} {user.apellido}</Text>
+                        <Text style={styles.bienvenida}>Hola, {user?.nombre}</Text>
+                        <Text style={styles.subtitulo}>Gestiona tus citas médicas</Text>
                     </View>
                     <View style={styles.headerActions}>
                         <TouchableOpacity onPress={() => navigation.navigate('AjustesCuenta')} style={styles.iconButton}>
@@ -139,16 +130,6 @@ const ClienteDashboard = ({ navigation }) => {
                 
                 {/* Estadísticas rápidas */}
                 <View style={styles.statsContainer}>
-                    <View style={styles.statItem}>
-                        <Text style={styles.statNumero}>{citasProximas.length}</Text>
-                        <Text style={styles.statLabel}>Próximas</Text>
-                    </View>
-                    <View style={styles.statDivider} />
-                    <View style={styles.statItem}>
-                        <Text style={styles.statNumero}>{citasPasadas.length}</Text>
-                        <Text style={styles.statLabel}>Pasadas</Text>
-                    </View>
-                    <View style={styles.statDivider} />
                     <View style={styles.statItem}>
                         <Text style={styles.statNumero}>{citas.length}</Text>
                         <Text style={styles.statLabel}>Total</Text>
@@ -177,7 +158,7 @@ const ClienteDashboard = ({ navigation }) => {
             </View>
 
             <FlatList
-                data={citasAMostrar}
+                data={citas}
                 keyExtractor={(item) => String(item.id_cita)}
                 renderItem={({ item }) => <CitaCard cita={item} />}
                 refreshControl={
@@ -213,12 +194,12 @@ const ClienteDashboard = ({ navigation }) => {
                 }
                 contentContainerStyle={[
                     styles.listaContent,
-                    citasAMostrar.length === 0 && styles.listaEmpty
+                    citas.length === 0 && styles.listaEmpty
                 ]}
                 showsVerticalScrollIndicator={false}
             />
 
-            {/* Botón Flotante (FAB) mejorado */}
+            {/* Botón Flotante (FAB) más moderno */}
             <TouchableOpacity
                 style={styles.fab}
                 onPress={() => navigation.navigate('NuevaCita')}
@@ -247,7 +228,6 @@ const styles = StyleSheet.create({
         fontWeight: '500'
     },
     
-    // Header
     header: {
         backgroundColor: '#1E3A5F',
         paddingHorizontal: 20,
@@ -281,6 +261,12 @@ const styles = StyleSheet.create({
         fontSize: 22, 
         fontWeight: '800', 
         color: '#fff',
+        marginTop: 2,
+    },
+    subtitulo: {
+        color: '#93C5FD',
+        fontSize: 14,
+        fontWeight: '500',
         marginTop: 2,
     },
     headerActions: { 
@@ -367,7 +353,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
 
-    // Tarjetas
     card: {
         backgroundColor: '#fff',
         borderRadius: 16,
@@ -422,27 +407,16 @@ const styles = StyleSheet.create({
         gap: 12,
     },
     
-    fechaContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 12,
-        backgroundColor: '#F8FAFC',
-        padding: 10,
-        borderRadius: 10,
+    cardFechaLabel: {
+        fontSize: 11,
+        color: '#94A3B8',
+        fontWeight: '700',
+        textTransform: 'uppercase',
     },
-    fechaIcono: {
-        fontSize: 20,
-    },
-    fechaCompleta: {
-        fontSize: 14,
-        color: '#334155',
+    cardFechaValue: {
+        fontSize: 15,
+        color: '#1E293B',
         fontWeight: '600',
-        marginBottom: 2,
-    },
-    horaTexto: {
-        fontSize: 13,
-        color: '#64748B',
-        fontWeight: '500',
     },
     
     motivoContainer: { 
@@ -508,7 +482,7 @@ const styles = StyleSheet.create({
         fontSize: 15,
     },
 
-    // Botón Flotante (FAB) mejorado
+    // Botón Flotante
     fab: {
         position: 'absolute',
         bottom: 30,

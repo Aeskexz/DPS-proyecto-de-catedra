@@ -1,14 +1,13 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     View, Text, FlatList, TouchableOpacity,
     StyleSheet, ActivityIndicator, Alert, RefreshControl, useWindowDimensions
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
-import { citasService } from '../../services/api';
+import { escucharCitas } from '../../services/firestore-crud';
 import { getResponsive } from '../../utils/responsive';
 
-// Definición de colores por estado para coherencia visual
 const colorEstado = {
     pendiente: { bg: '#FEF9C3', text: '#854D0E' },
     confirmada: { bg: '#DCFCE7', text: '#166534' },
@@ -24,21 +23,16 @@ const MedicoDashboard = ({ navigation }) => {
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
 
-    const cargarCitas = useCallback(async () => {
-        try {
-            const data = await citasService.getMisCitas();
-            setCitas(data);
-        } catch (error) {
-            Alert.alert('Error', error.message);
-        } finally {
+    useEffect(() => {
+        const unsub = escucharCitas(null, (allCitas) => {
+            const misCitas = allCitas.filter(c => c.id_medico === user?.uid);
+            setCitas(misCitas);
             setLoading(false);
             setRefreshing(false);
-        }
-    }, []);
+        });
 
-    useEffect(() => { cargarCitas(); }, [cargarCitas]);
-
-    const onRefresh = () => { setRefreshing(true); cargarCitas(); };
+        return unsub;
+    }, [user?.uid]);
 
     if (loading) {
         return (
@@ -55,7 +49,7 @@ const MedicoDashboard = ({ navigation }) => {
             <TouchableOpacity
                 activeOpacity={0.7}
                 style={styles.card}
-                onPress={() => navigation.navigate('DetalleCitaMedico', { cita: item, onVolver: cargarCitas })}
+                onPress={() => navigation.navigate('DetalleCitaMedico', { cita: item })}
             >
                 <View style={styles.cardHeader}>
                     <View style={styles.pacienteContainer}>
@@ -71,20 +65,20 @@ const MedicoDashboard = ({ navigation }) => {
 
                 <View style={styles.cardInfo}>
                     <View style={styles.infoRow}>
-                        <Text style={styles.infoText}>📅 {item.fecha_cita}</Text>
-                        <Text style={styles.infoText}>🕒 {item.hora_cita?.slice(0, 5)}</Text>
+                        <Text style={styles.infoText}>{item.fecha_cita}</Text>
+                        <Text style={styles.infoText}>{item.hora_cita?.slice(0, 5)}</Text>
                     </View>
                     {item.motivo_consulta && (
                         <View style={styles.motivoBox}>
                             <Text style={styles.motivoText} numberOfLines={1}>
-                                💬 {item.motivo_consulta}
+                                {item.motivo_consulta}
                             </Text>
                         </View>
                     )}
                 </View>
                 
                 <View style={styles.cardFooter}>
-                    <Text style={styles.verMas}>Gestionar Cita →</Text>
+                    <Text style={styles.verMas}>Gestionar Cita</Text>
                 </View>
             </TouchableOpacity>
         );
@@ -95,10 +89,10 @@ const MedicoDashboard = ({ navigation }) => {
             <View style={styles.header}>
                 <View style={[styles.headerTop, isMobile && styles.headerTopMobile]}>
                     <View>
-                        <Text style={styles.saludo}>Buen día,</Text>
-                        <Text style={styles.titulo}>Dr. {user.nombre} {user.apellido}</Text>
+                        <Text style={styles.saludo}>Buen dia,</Text>
+                        <Text style={styles.titulo}>Dr. {user?.nombre || user?.displayName} {user?.apellido || ''}</Text>
                         <View style={styles.countBadge}>
-                            <Text style={styles.countText}>{citas.length} CITAS HOY</Text>
+                            <Text style={styles.countText}>{citas.length} CITAS</Text>
                         </View>
                     </View>
                     
@@ -121,14 +115,14 @@ const MedicoDashboard = ({ navigation }) => {
 
             <FlatList
                 data={citas}
-                keyExtractor={(item) => String(item.id_cita)}
+                keyExtractor={(item) => String(item.id)}
                 renderItem={renderCita}
                 refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#166534" />
+                    <RefreshControl refreshing={refreshing} onRefresh={() => setRefreshing(true)} tintColor="#166534" />
                 }
                 ListEmptyComponent={
                     <View style={styles.emptyContainer}>
-                        <Text style={styles.vacio}>No hay citas programadas para hoy.</Text>
+                        <Text style={styles.vacio}>No hay citas programadas.</Text>
                     </View>
                 }
                 contentContainerStyle={styles.listContent}
@@ -142,7 +136,6 @@ const styles = StyleSheet.create({
     center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
     loadingText: { marginTop: 10, color: '#166534', fontWeight: '600' },
     
-    // Header
     header: {
         backgroundColor: '#166534',
         paddingHorizontal: 20,
@@ -176,7 +169,6 @@ const styles = StyleSheet.create({
     actionBtnText: { color: '#fff', fontWeight: '700', fontSize: 13 },
     logoutText: { color: '#FCA5A5' },
 
-    // Listado
     listContent: { paddingBottom: 30, paddingTop: 10 },
     card: {
         backgroundColor: '#fff',

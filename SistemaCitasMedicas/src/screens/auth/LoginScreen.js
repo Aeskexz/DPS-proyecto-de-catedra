@@ -7,24 +7,25 @@ import { useAuth } from '../../context/AuthContext';
 
 const LoginScreen = ({ navigation }) => {
     const { login } = useAuth();
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
 
     const handleLogin = async () => {
-        setError('');
-
-        if (!username.trim() || !password.trim()) {
-            setError('Por favor ingresa tu usuario y contraseña.');
+        if (!email.trim() || !password.trim()) {
+            Alert.alert('Campos requeridos', 'Por favor ingresa tu correo y contrasena.');
             return;
         }
 
         setLoading(true);
+
         try {
-            await login(username.trim(), password);
-        } catch (err) {
-            setError(err.message || 'Credenciales incorrectas. Intenta de nuevo.');
+            await login(email.trim(), password);
+        } catch (error) {
+            Alert.alert(
+                'Error al iniciar sesion',
+                error.message || 'Credenciales incorrectas'
+            );
         } finally {
             setLoading(false);
         }
@@ -37,52 +38,53 @@ const LoginScreen = ({ navigation }) => {
         >
             <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
                 <View style={styles.card}>
-                    {/* Header y Logo */}
                     <View style={styles.logoContainer}>
                         <View style={styles.iconCircle}>
-                            <Text style={styles.iconText}>✚</Text>
+                            <Text style={styles.iconText}>+</Text>
                         </View>
-                        <Text style={styles.titulo}>CitasMéd</Text>
+
+                        <Text style={styles.titulo}>CitasMed</Text>
                         <Text style={styles.subtitulo}>Tu salud en buenas manos</Text>
                     </View>
 
-                    {/* Formulario */}
                     <View style={styles.form}>
-                        {error ? (
-                            <View style={styles.errorBox}>
-                                <Text style={styles.errorIcon}>⚠</Text>
-                                <Text style={styles.errorText}>{error}</Text>
-                            </View>
-                        ) : null}
+                        <Text style={styles.label}>Correo electronico</Text>
 
-                        <Text style={styles.label}>Usuario o Correo</Text>
                         <TextInput
                             style={styles.input}
-                            placeholder="Digite su usuario o correo..."
+                            placeholder="correo@ejemplo.com"
                             placeholderTextColor="#94A3B8"
                             autoCapitalize="none"
-                            value={username}
-                            onChangeText={setUsername}
+                            keyboardType="email-address"
+                            value={email}
+                            onChangeText={setEmail}
                         />
 
-                        <Text style={styles.label}>Contraseña</Text>
+                        <Text style={styles.label}>Contrasena</Text>
+
                         <TextInput
                             style={styles.input}
-                            placeholder="••••••••"
+                            placeholder="--------"
                             placeholderTextColor="#94A3B8"
                             secureTextEntry
                             value={password}
                             onChangeText={setPassword}
                         />
 
-                        <TouchableOpacity 
-                            onPress={() => Alert.alert('Recuperación', 'Próximamente: Se enviará un enlace a tu correo.')}
+                        <TouchableOpacity
+                            onPress={() =>
+                                Alert.alert(
+                                    'Recuperacion',
+                                    'Proximamente: Se enviara un enlace a tu correo.'
+                                )
+                            }
                             style={styles.forgotBtn}
                         >
-                            <Text style={styles.forgotText}>¿Olvidaste tu contraseña?</Text>
+                            <Text style={styles.forgotText}>
+                                Olvidaste tu contrasena?
+                            </Text>
                         </TouchableOpacity>
 
-                        {/* Botón de Acción */}
                         <TouchableOpacity
                             style={[styles.boton, loading && styles.botonDesactivado]}
                             onPress={handleLogin}
@@ -96,11 +98,15 @@ const LoginScreen = ({ navigation }) => {
                         </TouchableOpacity>
                     </View>
 
-                    {/* Footer */}
                     <View style={styles.footer}>
-                        <Text style={styles.footerText}>¿Aún no tienes cuenta?</Text>
+                        <Text style={styles.footerText}>
+                            Aun no tienes cuenta?
+                        </Text>
+
                         <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-                            <Text style={styles.link}>Regístrate aquí</Text>
+                            <Text style={styles.link}>
+                                Registrate aqui
+                            </Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -114,11 +120,13 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#F8FAFC',
     },
+
     scrollContainer: {
         flexGrow: 1,
         justifyContent: 'center',
         padding: 24,
     },
+
     card: {
         width: '100%',
         maxWidth: 420,
@@ -132,10 +140,12 @@ const styles = StyleSheet.create({
         shadowRadius: 15,
         shadowOffset: { width: 0, height: 10 },
     },
+
     logoContainer: {
         alignItems: 'center',
         marginBottom: 30,
     },
+
     iconCircle: {
         width: 60,
         height: 60,
@@ -145,47 +155,30 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 16,
     },
+
     iconText: {
         color: '#fff',
         fontSize: 30,
         fontWeight: 'bold',
     },
+
     titulo: {
         fontSize: 32,
         fontWeight: '900',
         color: '#1E293B',
         letterSpacing: -1,
     },
+
     subtitulo: {
         fontSize: 15,
         color: '#64748B',
         marginTop: 4,
     },
+
     form: {
         width: '100%',
     },
-    errorBox: {
-        backgroundColor: '#FEE2E2',
-        borderLeftWidth: 4,
-        borderLeftColor: '#EF4444',
-        borderRadius: 8,
-        padding: 12,
-        marginBottom: 20,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 10,
-    },
-    errorIcon: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: '#DC2626',
-    },
-    errorText: {
-        flex: 1,
-        color: '#991B1B',
-        fontSize: 14,
-        fontWeight: '500',
-    },
+
     label: {
         fontSize: 12,
         fontWeight: '800',
@@ -194,6 +187,7 @@ const styles = StyleSheet.create({
         textTransform: 'uppercase',
         letterSpacing: 0.5,
     },
+
     input: {
         height: 52,
         borderWidth: 1.5,
@@ -205,15 +199,18 @@ const styles = StyleSheet.create({
         backgroundColor: '#F8FAFC',
         color: '#1E293B',
     },
+
     forgotBtn: {
         alignSelf: 'flex-end',
         marginBottom: 24,
     },
+
     forgotText: {
         color: '#2563EB',
         fontSize: 13,
         fontWeight: '700',
     },
+
     boton: {
         backgroundColor: '#2563EB',
         borderRadius: 14,
@@ -226,25 +223,30 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 4 },
         elevation: 5,
     },
+
     botonDesactivado: {
         backgroundColor: '#94A3B8',
         elevation: 0,
     },
+
     botonTexto: {
         color: '#fff',
         fontWeight: '800',
         fontSize: 17,
     },
+
     footer: {
         marginTop: 30,
         flexDirection: 'row',
         justifyContent: 'center',
         gap: 5,
     },
+
     footerText: {
         color: '#64748B',
         fontSize: 14,
     },
+
     link: {
         color: '#2563EB',
         fontWeight: '800',

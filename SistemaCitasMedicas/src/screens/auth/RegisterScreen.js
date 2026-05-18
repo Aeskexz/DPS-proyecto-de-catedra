@@ -3,7 +3,7 @@ import {
     View, Text, TextInput, TouchableOpacity, StyleSheet,
     ActivityIndicator, Alert, ScrollView, KeyboardAvoidingView, Platform
 } from 'react-native';
-import { authService } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
 const Campo = ({ label, campo, placeholder, secureTextEntry, keyboardType, valor, onChange }) => (
     <View style={styles.campoContainer}>
@@ -22,6 +22,7 @@ const Campo = ({ label, campo, placeholder, secureTextEntry, keyboardType, valor
 );
 
 const RegisterScreen = ({ navigation }) => {
+    const { register } = useAuth();
     const [form, setForm] = useState({
         nombre: '',
         apellido: '',
@@ -35,7 +36,6 @@ const RegisterScreen = ({ navigation }) => {
 
     const update = (campo, valor) => setForm((prev) => ({ ...prev, [campo]: valor }));
 
-    // Validación de Email con Regex
     const validarEmail = (email) => {
         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return regex.test(email);
@@ -44,36 +44,34 @@ const RegisterScreen = ({ navigation }) => {
     const handleRegister = async () => {
         const { nombre, apellido, email, username, password, confirmar_password } = form;
 
-        // Validaciones básicas
         if (!nombre || !apellido || !email || !username || !password) {
             return mostrarMensaje('Campos requeridos', 'Por favor, completa todos los campos marcados con (*).');
         }
         if (!validarEmail(email)) {
-            return mostrarMensaje('Email inválido', 'Introduce una dirección de correo electrónico real.');
+            return mostrarMensaje('Email invalido', 'Introduce una direccion de correo electronico real.');
         }
         if (password !== confirmar_password) {
-            return mostrarMensaje('Error', 'Las contraseñas no coinciden.');
+            return mostrarMensaje('Error', 'Las contrasenas no coinciden.');
         }
         if (password.length < 8) {
-            return mostrarMensaje('Contraseña débil', 'La contraseña debe tener al menos 8 caracteres.');
+            return mostrarMensaje('Contrasena debil', 'La contrasena debe tener al menos 8 caracteres.');
         }
 
         setLoading(true);
         try {
-            await authService.register({
+            const displayName = `${form.nombre.trim()} ${form.apellido.trim()}`;
+            await register(form.email.trim().toLowerCase(), form.password, displayName, {
                 nombre: form.nombre.trim(),
                 apellido: form.apellido.trim(),
-                email: form.email.trim().toLowerCase(),
                 username: form.username.trim(),
-                password: form.password,
-                telefono: form.telefono.trim() || undefined,
+                telefono: form.telefono.trim() || '',
             });
 
             if (Platform.OS === 'web') {
-                window.alert('¡Cuenta creada con éxito! Bienvenido.');
+                window.alert('Cuenta creada con exito! Bienvenido.');
                 navigation.navigate('Login');
             } else {
-                Alert.alert('¡Cuenta creada!', 'Tu registro fue exitoso.', [
+                Alert.alert('Cuenta creada!', 'Tu registro fue exitoso.', [
                     { text: 'Ir al Login', onPress: () => navigation.navigate('Login') },
                 ]);
             }
@@ -95,22 +93,21 @@ const RegisterScreen = ({ navigation }) => {
                 <RegisterScreen.FormWrapper>
                     <View style={styles.header}>
                         <Text style={styles.titulo}>Crear cuenta</Text>
-                        <Text style={styles.subtitulo}>Regístrate para gestionar tus citas médicas</Text>
+                        <Text style={styles.subtitulo}>Registrate para gestionar tus citas medicas</Text>
                     </View>
 
                     <Campo label="Nombre *" campo="nombre" placeholder="Ej. Juan" valor={form.nombre} onChange={update} />
-                    <Campo label="Apellido *" campo="apellido" placeholder="Ej. Pérez" valor={form.apellido} onChange={update} />
-                    <Campo label="Correo electrónico *" campo="email" placeholder="juan@email.com" keyboardType="email-address" valor={form.email} onChange={update} />
+                    <Campo label="Apellido *" campo="apellido" placeholder="Ej. Perez" valor={form.apellido} onChange={update} />
+                    <Campo label="Correo electronico *" campo="email" placeholder="juan@email.com" keyboardType="email-address" valor={form.email} onChange={update} />
                     <Campo label="Nombre de usuario *" campo="username" placeholder="juanperez123" valor={form.username} onChange={update} />
                     
-                    <Campo label="Contraseña *" campo="password" placeholder="Mínimo 8 caracteres" secureTextEntry valor={form.password} onChange={update} />
-                    {/* Requisito de contraseña en tiempo real (Visual) */}
+                    <Campo label="Contrasena *" campo="password" placeholder="Minimo 8 caracteres" secureTextEntry valor={form.password} onChange={update} />
                     <Text style={[styles.pwdHint, form.password.length >= 8 ? {color: '#16A34A'} : {color: '#94A3B8'}]}>
-                        {form.password.length >= 8 ? '✓ Contraseña válida' : '• Mínimo 8 caracteres'}
+                        {form.password.length >= 8 ? 'Contrasena valida' : 'Minimo 8 caracteres'}
                     </Text>
 
-                    <Campo label="Confirmar contraseña *" campo="confirmar_password" placeholder="••••••••" secureTextEntry valor={form.confirmar_password} onChange={update} />
-                    <Campo label="Teléfono (opcional)" campo="telefono" placeholder="+503 XXXX-XXXX" keyboardType="phone-pad" valor={form.telefono} onChange={update} />
+                    <Campo label="Confirmar contrasena *" campo="confirmar_password" placeholder="--------" secureTextEntry valor={form.confirmar_password} onChange={update} />
+                    <Campo label="Telefono (opcional)" campo="telefono" placeholder="+503 XXXX-XXXX" keyboardType="phone-pad" valor={form.telefono} onChange={update} />
 
                     <TouchableOpacity
                         style={[styles.boton, loading && styles.botonDisabled]}
@@ -121,7 +118,7 @@ const RegisterScreen = ({ navigation }) => {
                     </TouchableOpacity>
 
                     <TouchableOpacity onPress={() => navigation.navigate('Login')} style={styles.linkContainer}>
-                        <Text style={styles.linkBase}>¿Ya tienes cuenta? <Text style={styles.linkHighlight}>Inicia sesión</Text></Text>
+                        <Text style={styles.linkBase}>Ya tienes cuenta? <Text style={styles.linkHighlight}>Inicia sesion</Text></Text>
                     </TouchableOpacity>
                 </RegisterScreen.FormWrapper>
             </ScrollView>

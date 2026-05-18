@@ -1,26 +1,15 @@
-// ============================================================
-// src/screens/admin/GestionMedicos.js
-// ============================================================
-// RESPONSABLE: Equipo Frontend
-// ESTADO: Completo. Lista de médicos activos con opción de desactivar.
-//
-// TODO PARA TUS COMPAÑEROS:
-//   - Agregar pantalla de edición de médico (PUT /api/medicos/:id)
-//   - Mostrar horarios de disponibilidad de cada médico
-// ============================================================
-
 import React, { useEffect, useState, useCallback } from 'react';
 import {
     View, Text, FlatList, TouchableOpacity,
     StyleSheet, ActivityIndicator, Alert, RefreshControl, useWindowDimensions, TextInput, Platform
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { medicosService } from '../../services/api';
+import { obtenerMedicos, eliminarMedico } from '../../services/firestore-crud';
 import { getResponsive } from '../../utils/responsive';
 
 const GestionMedicos = ({ navigation, route }) => {
     const { width } = useWindowDimensions();
-    const { horizontalPadding, contentMaxWidth, isMobile } = getResponsive(width);
+    const { horizontalPadding, contentMaxWidth } = getResponsive(width);
     const [medicos, setMedicos] = useState([]);
     const [medicosFiltrados, setMedicosFiltrados] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -29,7 +18,7 @@ const GestionMedicos = ({ navigation, route }) => {
 
     const cargar = useCallback(async () => {
         try {
-            const data = await medicosService.getLista();
+            const data = await obtenerMedicos();
             setMedicos(data);
             setMedicosFiltrados(data);
         } catch (e) { 
@@ -59,6 +48,7 @@ const GestionMedicos = ({ navigation, route }) => {
     }, [busqueda, medicos]);
 
     const desactivar = (id, nombre) => {
+<<<<<<< HEAD
         Alert.alert(
             'Desactivar médico',
             `¿Estás seguro de desactivar al Dr. ${nombre}?\n\nSus citas pendientes serán canceladas.`,
@@ -77,6 +67,18 @@ const GestionMedicos = ({ navigation, route }) => {
                             Alert.alert('Error', e.message); 
                         }
                     },
+=======
+        Alert.alert('Desactivar medico', `Desactivar a ${nombre}?`, [
+            { text: 'Cancelar', style: 'cancel' },
+            {
+                text: 'Desactivar', style: 'destructive',
+                onPress: async () => {
+                    try {
+                        await eliminarMedico(id);
+                        if (route.params?.onVolver) route.params.onVolver();
+                        cargar();
+                    } catch (e) { Alert.alert('Error', e.message); }
+>>>>>>> ed7bd74 (ahora la base de datos esta con firebase)
                 },
             ]
         );
@@ -107,6 +109,7 @@ const GestionMedicos = ({ navigation, route }) => {
         <SafeAreaView style={styles.container} edges={['top']}>
             {/* Header */}
             <View style={styles.header}>
+<<<<<<< HEAD
                 <View style={styles.headerTop}>
                     <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
                         <Text style={styles.backIcon}>←</Text>
@@ -141,10 +144,20 @@ const GestionMedicos = ({ navigation, route }) => {
                         </TouchableOpacity>
                     ) : null}
                 </View>
+=======
+                <TouchableOpacity onPress={() => navigation.goBack()}>
+                    <Text style={styles.back}>{'<- Volver'}</Text>
+                </TouchableOpacity>
+                <Text style={styles.titulo}>Medicos Activos</Text>
+                <TouchableOpacity onPress={() => navigation.navigate('RegistrarMedico', { onVolver: cargar })}>
+                    <Text style={styles.nuevo}>+ Nuevo</Text>
+                </TouchableOpacity>
+>>>>>>> ed7bd74 (ahora la base de datos esta con firebase)
             </View>
 
             {/* Lista */}
             <FlatList
+<<<<<<< HEAD
                 data={medicosFiltrados}
                 keyExtractor={(item) => String(item.id_medico)}
                 contentContainerStyle={[
@@ -199,14 +212,28 @@ const GestionMedicos = ({ navigation, route }) => {
                             ) : null}
                         </View>
 
+=======
+                data={medicos}
+                keyExtractor={(item) => String(item.id)}
+                contentContainerStyle={{ paddingHorizontal: horizontalPadding, paddingBottom: 32 }}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); cargar(); }} />}
+                renderItem={({ item }) => (
+                    <View style={[styles.card, { maxWidth: contentMaxWidth, alignSelf: 'center' }]}>
+                        <Text style={styles.nombre}>{item.nombre_completo || item.displayName}</Text>
+                        <Text style={styles.esp}>{item.especialidad}</Text>
+                        <Text style={styles.info}>{item.email}</Text>
+                        {item.telefono ? <Text style={styles.info}>{item.telefono}</Text> : null}
+                        {item.numero_colegiado ? <Text style={styles.info}>Colegiado: {item.numero_colegiado}</Text> : null}
+>>>>>>> ed7bd74 (ahora la base de datos esta con firebase)
                         <TouchableOpacity
                             style={styles.desactivarBtn}
-                            onPress={() => desactivar(item.id_medico, item.nombre_completo)}
+                            onPress={() => desactivar(item.id, item.nombre_completo || item.displayName)}
                         >
                             <Text style={styles.desactivarText}>Desactivar</Text>
                         </TouchableOpacity>
                     </TouchableOpacity>
                 )}
+<<<<<<< HEAD
                 ListEmptyComponent={
                     <View style={styles.emptyContainer}>
                         <Text style={styles.emptyTitle}>
@@ -244,6 +271,9 @@ const GestionMedicos = ({ navigation, route }) => {
                     ) : null
                 }
                 showsVerticalScrollIndicator={false}
+=======
+                ListEmptyComponent={<Text style={styles.vacio}>No hay medicos registrados.</Text>}
+>>>>>>> ed7bd74 (ahora la base de datos esta con firebase)
             />
         </SafeAreaView>
     );

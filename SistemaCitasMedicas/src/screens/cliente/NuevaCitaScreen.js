@@ -4,12 +4,14 @@ import {
     ScrollView, Alert, ActivityIndicator, useWindowDimensions, Platform
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { medicosService, citasService } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
+import { obtenerMedicos, crearCita } from '../../services/firestore-crud';
 import { getResponsive } from '../../utils/responsive';
 
-const NuevaCitaScreen = ({ navigation, route }) => {
+const NuevaCitaScreen = ({ navigation }) => {
     const { width } = useWindowDimensions();
     const { horizontalPadding, contentMaxWidth } = getResponsive(width);
+    const { user } = useAuth();
     const [medicos, setMedicos] = useState([]);
     const [medicoSeleccionado, setMedicoSeleccionado] = useState(null);
     const [date, setDate] = useState(new Date());
@@ -22,7 +24,6 @@ const NuevaCitaScreen = ({ navigation, route }) => {
     const [cargandoMedicos, setCargandoMedicos] = useState(true);
     const [error, setError] = useState('');
 
-    // Horas disponibles para días de semana (Lunes - Viernes): 7:00 AM - 5:00 PM
     const horasDiasSemana = [
         { value: '07:00', label: '7:00 AM' },
         { value: '07:30', label: '7:30 AM' },
@@ -73,15 +74,8 @@ const NuevaCitaScreen = ({ navigation, route }) => {
 
     const horasDisponibles = getHorasDisponibles();
 
-    const getDiaSeleccionado = () => {
-        if (!fechaTexto) return '';
-        const fecha = new Date(fechaTexto + 'T00:00:00');
-        const dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-        return dias[fecha.getDay()];
-    };
-
     useEffect(() => {
-        medicosService.getLista()
+        obtenerMedicos()
             .then(setMedicos)
             .catch((e) => Alert.alert('Error', e.message))
             .finally(() => setCargandoMedicos(false));
@@ -126,32 +120,36 @@ const NuevaCitaScreen = ({ navigation, route }) => {
             const year = fecha.getFullYear();
 
             if (year !== 2026) {
-                setError('Las citas solo se pueden agendar para el año 2026.');
+                Alert.alert('Ano no valido', 'Las citas solo se pueden agendar para el ano 2026.');
                 return;
             }
 
             const diaSemana = fecha.getDay();
             if (diaSemana === 0) {
-                setError('Los domingos no hay atención. Por favor selecciona otro día.');
+                Alert.alert('Dia no disponible', 'Los domingos no hay atencion. Por favor selecciona otro dia.');
                 return;
             }
         }
 
-        if (!hora) {
-            setError('Por favor selecciona una hora para la cita.');
+        if (!medicoSeleccionado || !fechaTexto || !hora) {
+            Alert.alert('Campos requeridos', 'Selecciona medico, fecha y hora.');
             return;
         }
 
         setLoading(true);
         try {
-            await citasService.crearCita({
-                id_medico: medicoSeleccionado.id_medico,
+            await crearCita({
+                clienteId: user.uid,
+                nombre_paciente: user.nombre || user.displayName || 'Paciente',
+                id_medico: medicoSeleccionado.id,
+                nombre_medico: medicoSeleccionado.nombre_completo || medicoSeleccionado.displayName || 'Medico',
+                especialidad: medicoSeleccionado.especialidad || '',
                 fecha_cita: fechaTexto,
                 hora_cita: hora + ':00',
-                motivo_consulta: motivo.trim() || undefined,
+                motivo_consulta: motivo.trim() || '',
             });
 
-            Alert.alert('¡Cita creada!', 'Tu cita fue registrada exitosamente.', [
+            Alert.alert('Cita creada!', 'Tu cita fue registrada exitosamente.', [
                 {
                     text: 'Entendido',
                     onPress: () => navigation.goBack(),
@@ -174,7 +172,7 @@ const NuevaCitaScreen = ({ navigation, route }) => {
             
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-                    <Text style={styles.backText}>←</Text>
+                    <Text style={styles.backText}>{'<-'}</Text>
                 </TouchableOpacity>
                 <View>
                     <Text style={styles.titulo}>Agendar Cita</Text>
@@ -186,14 +184,17 @@ const NuevaCitaScreen = ({ navigation, route }) => {
             <View style={styles.medicoList}>
                 {medicos.map((m) => (
                     <TouchableOpacity
-                        key={m.id_medico}
-                        style={[styles.medicoCard, medicoSeleccionado?.id_medico === m.id_medico && styles.medicoSeleccionado]}
+                        key={m.id}
+                        style={[styles.medicoCard, medicoSeleccionado?.id === m.id && styles.medicoSeleccionado]}
                         onPress={() => setMedicoSeleccionado(m)}
                     >
-                        <Text style={[styles.medicoNombre, medicoSeleccionado?.id_medico === m.id_medico && styles.textoBlanco]}>{m.nombre_completo}</Text>
-                        <Text style={[styles.medicoEsp, medicoSeleccionado?.id_medico === m.id_medico && styles.textoAzulClaro]}>{m.especialidad}</Text>
+                        <Text style={[styles.medicoNombre, medicoSeleccionado?.id === m.id && styles.textoBlanco]}>{m.nombre_completo || m.displayName}</Text>
+                        <Text style={[styles.medicoEsp, medicoSeleccionado?.id === m.id && styles.textoAzulClaro]}>{m.especialidad}</Text>
                     </TouchableOpacity>
                 ))}
+                {medicos.length === 0 && (
+                    <Text style={styles.vacioText}>No hay medicos disponibles aun.</Text>
+                )}
             </View>
 
             <View style={styles.formCard}>
@@ -242,7 +243,6 @@ const NuevaCitaScreen = ({ navigation, route }) => {
                             <Text style={fechaTexto ? styles.inputText : styles.placeholderText}>
                                 {fechaTexto ? fechaTexto : "Seleccionar fecha..."}
                             </Text>
-                            <Text style={styles.calendarIcon}>📅</Text>
                         </TouchableOpacity>
                     )}
                 </View>
@@ -267,8 +267,7 @@ const NuevaCitaScreen = ({ navigation, route }) => {
                         if (diaSemana === 0) {
                             return (
                                 <View style={styles.domingoContainer}>
-                                    <Text style={styles.domingoIcon}>⛔</Text>
-                                    <Text style={styles.domingoTexto}>No hay atención los domingos</Text>
+                                    <Text style={styles.domingoTexto}>No hay atencion los domingos</Text>
                                 </View>
                             );
                         }
@@ -304,10 +303,9 @@ const NuevaCitaScreen = ({ navigation, route }) => {
                                             <Text style={hora ? styles.inputText : styles.placeholderText}>
                                                 {hora ? horasDisponibles.find(h => h.value === hora)?.label || hora : "Seleccionar hora..."}
                                             </Text>
-                                            <Text style={styles.calendarIcon}>🕐</Text>
                                         </TouchableOpacity>
                                     )}
-                                    <Text style={styles.horaNota}>📅 Sábado: solo disponible de 7:00 AM a 12:30 PM</Text>
+                                    <Text style={styles.horaNota}>Sabado: solo disponible de 7:00 AM a 12:30 PM</Text>
                                 </>
                             );
                         }
@@ -341,15 +339,14 @@ const NuevaCitaScreen = ({ navigation, route }) => {
                                         <Text style={hora ? styles.inputText : styles.placeholderText}>
                                             {hora ? horasDisponibles.find(h => h.value === hora)?.label || hora : "Seleccionar hora..."}
                                         </Text>
-                                        <Text style={styles.calendarIcon}>🕐</Text>
                                     </TouchableOpacity>
                                 )}
-                                <Text style={styles.horaNota}>🕐 Disponible de 7:00 AM a 5:00 PM (cerramos 1:00 PM - 2:00 PM por almuerzo)</Text>
+                                <Text style={styles.horaNota}>Disponible de 7:00 AM a 5:00 PM (cerramos 1:00 PM - 2:00 PM por almuerzo)</Text>
                             </>
                         );
                     })()}
                     {!fechaTexto && (
-                        <Text style={styles.horaNota}>📅 Selecciona una fecha para ver las horas disponibles</Text>
+                        <Text style={styles.horaNota}>Selecciona una fecha para ver las horas disponibles</Text>
                     )}
                 </View>
 
@@ -370,7 +367,7 @@ const NuevaCitaScreen = ({ navigation, route }) => {
                 onPress={handleCrearCita}
                 disabled={loading || !medicoSeleccionado}
             >
-                <Text style={styles.botonTexto}>{loading ? "Cargando..." : "Confirmar Reservación"}</Text>
+                <Text style={styles.botonTexto}>{loading ? "Cargando..." : "Confirmar Reservacion"}</Text>
             </TouchableOpacity>
             </View>
         </ScrollView>
@@ -421,14 +418,13 @@ const styles = StyleSheet.create({
     inputGroup: { marginBottom: 18 },
     label: { fontSize: 13, fontWeight: '700', color: '#475569', marginBottom: 8, textTransform: 'uppercase' },
     input: { borderWidth: 1.5, borderColor: '#F1F5F9', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, fontSize: 15, backgroundColor: '#F8FAFC' },
-    inputPicker: {
+    inputPicker: { 
         flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
         borderWidth: 1.5, borderColor: '#F1F5F9', borderRadius: 12,
         paddingHorizontal: 16, paddingVertical: 14, backgroundColor: '#F8FAFC'
     },
     inputText: { fontSize: 15, color: '#1E293B', fontWeight: '600' },
     placeholderText: { fontSize: 15, color: '#94A3B8' },
-    calendarIcon: { fontSize: 18 },
     textArea: { height: 80, textAlignVertical: 'top' },
     horaNota: { fontSize: 12, color: '#64748B', marginTop: 6, fontStyle: 'italic' },
     domingoContainer: {
@@ -441,8 +437,8 @@ const styles = StyleSheet.create({
         padding: 16,
         gap: 12,
     },
-    domingoIcon: { fontSize: 24 },
     domingoTexto: { fontSize: 14, color: '#991B1B', fontWeight: '600' },
+    vacioText: { color: '#94A3B8', fontSize: 14, textAlign: 'center', marginTop: 10 },
     boton: { backgroundColor: '#2563EB', borderRadius: 16, paddingVertical: 18, alignItems: 'center', marginTop: 10, marginBottom: 40 },
     botonDisabled: { backgroundColor: '#94A3B8' },
     botonTexto: { color: '#fff', fontWeight: '800', fontSize: 16 },

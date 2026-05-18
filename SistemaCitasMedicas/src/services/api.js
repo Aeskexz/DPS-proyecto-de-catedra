@@ -1,14 +1,3 @@
-// ============================================================
-// src/services/api.js - Cliente HTTP base (Axios)
-// ============================================================
-// RESPONSABLE: Equipo Frontend / Backend
-// ESTADO: Completo. Agrega el JWT automáticamente en cada request.
-//
-// IMPORTANTE: Cambia BASE_URL a la IP de tu PC en red local
-//             si necesitas probar en un dispositivo físico.
-//             Ejemplo: 'http://192.168.1.100:3001/api'
-// ============================================================
-
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';

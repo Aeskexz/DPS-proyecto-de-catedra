@@ -3,7 +3,7 @@ import {
     View, Text, TextInput, TouchableOpacity,
     StyleSheet, Alert, ActivityIndicator, ScrollView, useWindowDimensions
 } from 'react-native';
-import { citasService } from '../../services/api';
+import { actualizarCita } from '../../services/firestore-crud';
 import { getResponsive } from '../../utils/responsive';
 
 const ESTADOS = ['pendiente', 'confirmada', 'completada', 'cancelada'];
@@ -11,7 +11,7 @@ const ESTADOS = ['pendiente', 'confirmada', 'completada', 'cancelada'];
 const DetalleCitaMedico = ({ route, navigation }) => {
     const { width } = useWindowDimensions();
     const { horizontalPadding, contentMaxWidth } = getResponsive(width);
-    const { cita, onVolver } = route.params;
+    const { cita } = route.params;
     const [estadoSel, setEstadoSel] = useState(cita.estado);
     const [notas, setNotas] = useState('');
     const [loading, setLoading] = useState(false);
@@ -19,9 +19,12 @@ const DetalleCitaMedico = ({ route, navigation }) => {
     const guardar = async () => {
         setLoading(true);
         try {
-            await citasService.actualizarEstado(cita.id_cita, estadoSel, notas.trim() || undefined);
-            Alert.alert('¡Éxito!', 'La ficha de la cita ha sido actualizada.', [
-                { text: 'Entendido', onPress: () => { if (onVolver) onVolver(); navigation.goBack(); } },
+            await actualizarCita(cita.id, {
+                estado: estadoSel,
+                notas_medico: notas.trim() || '',
+            });
+            Alert.alert('Exito', 'La ficha de la cita ha sido actualizada.', [
+                { text: 'Entendido', onPress: () => navigation.goBack() },
             ]);
         } catch (error) {
             Alert.alert('Error', error.message);
@@ -34,19 +37,17 @@ const DetalleCitaMedico = ({ route, navigation }) => {
         <ScrollView style={styles.main} contentContainerStyle={[styles.container, { paddingHorizontal: horizontalPadding }]}> 
             <View style={[styles.wrapper, { maxWidth: contentMaxWidth }]}> 
             
-            {/* Header con estilo de barra superior */}
             <View style={styles.headerBar}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                    <Text style={styles.backText}>← Volver</Text>
+                    <Text style={styles.backText}>{'<- Volver'}</Text>
                 </TouchableOpacity>
                 <Text style={styles.headerTitulo}>Expediente de Cita</Text>
             </View>
 
-            {/* Ficha del Paciente */}
             <View style={styles.infoCard}>
                 <View style={styles.cardHeader}>
                     <Text style={styles.pacienteNombre}>{cita.nombre_paciente}</Text>
-                    <Text style={styles.pacienteEmail}>{cita.email_paciente}</Text>
+                    <Text style={styles.pacienteEmail}>{cita.email_paciente || ''}</Text>
                 </View>
                 
                 <View style={styles.divider} />
@@ -62,16 +63,15 @@ const DetalleCitaMedico = ({ route, navigation }) => {
                     </View>
                 </View>
 
-                {cita.motivo_consulta && (
+                {cita.motivo_consulta ? (
                     <View style={styles.motivoBox}>
                         <Text style={styles.label}>MOTIVO DE CONSULTA</Text>
                         <Text style={styles.motivoTexto}>{cita.motivo_consulta}</Text>
                     </View>
-                )}
+                ) : null}
             </View>
 
-            {/* Control de Estado */}
-            <Text style={styles.seccionTitulo}>Actualizar situación</Text>
+            <Text style={styles.seccionTitulo}>Actualizar situacion</Text>
             <View style={styles.estadosContainer}>
                 {ESTADOS.map((e) => {
                     const esSeleccionado = estadoSel === e;
@@ -90,12 +90,11 @@ const DetalleCitaMedico = ({ route, navigation }) => {
                 })}
             </View>
 
-            {/* Notas Médicas */}
-            <Text style={styles.seccionTitulo}>Observaciones Médicas</Text>
+            <Text style={styles.seccionTitulo}>Observaciones Medicas</Text>
             <View style={styles.inputWrapper}>
                 <TextInput
                     style={styles.textarea}
-                    placeholder="Escriba aquí el diagnóstico, recetas o indicaciones..."
+                    placeholder="Escriba aqui el diagnostico, recetas o indicaciones..."
                     placeholderTextColor="#94A3B8"
                     multiline
                     value={notas}
@@ -125,13 +124,11 @@ const styles = StyleSheet.create({
     container: { paddingVertical: 20, flexGrow: 1 },
     wrapper: { width: '100%', alignSelf: 'center' },
     
-    // Header
     headerBar: { flexDirection: 'row', alignItems: 'center', marginBottom: 25, marginTop: 15 },
     backButton: { paddingRight: 15 },
     backText: { color: '#166534', fontWeight: '700', fontSize: 16 },
     headerTitulo: { fontSize: 20, fontWeight: '800', color: '#1E293B', flex: 1 },
 
-    // Ficha Paciente
     infoCard: {
         backgroundColor: '#fff', borderRadius: 20, padding: 20, marginBottom: 25,
         elevation: 4, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 10,
@@ -148,7 +145,6 @@ const styles = StyleSheet.create({
     motivoBox: { backgroundColor: '#F8FAFC', padding: 12, borderRadius: 12, marginTop: 5 },
     motivoTexto: { fontSize: 14, color: '#475569', marginTop: 4, lineHeight: 20 },
 
-    // Estados
     seccionTitulo: { fontSize: 15, fontWeight: '800', color: '#334155', marginBottom: 12, paddingLeft: 5 },
     estadosContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 25 },
     estadoChip: {
@@ -159,13 +155,11 @@ const styles = StyleSheet.create({
     estadoChipText: { color: '#64748B', fontWeight: '700', fontSize: 12 },
     estadoChipTextSel: { color: '#fff' },
 
-    // Input
     inputWrapper: { backgroundColor: '#fff', borderRadius: 15, padding: 5, elevation: 1 },
     textarea: {
         minHeight: 120, padding: 15, fontSize: 15, color: '#1E293B',
     },
 
-    // Botón
     botonGuardar: {
         backgroundColor: '#166534', borderRadius: 16, paddingVertical: 18,
         alignItems: 'center', marginTop: 30, marginBottom: 40,
