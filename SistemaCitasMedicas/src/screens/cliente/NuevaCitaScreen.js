@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import {
     View, Text, TextInput, TouchableOpacity, StyleSheet,
-    ScrollView, Alert, ActivityIndicator, useWindowDimensions, Platform
+    ScrollView, Alert, ActivityIndicator, useWindowDimensions, Platform,
+    Modal, FlatList
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useAuth } from '../../context/AuthContext';
@@ -23,6 +24,7 @@ const NuevaCitaScreen = ({ navigation }) => {
     const [loading, setLoading] = useState(false);
     const [cargandoMedicos, setCargandoMedicos] = useState(true);
     const [error, setError] = useState('');
+    const [showHoraPicker, setShowHoraPicker] = useState(false);
 
     const horasDiasSemana = [
         { value: '07:00', label: '7:00 AM' },
@@ -299,10 +301,11 @@ const NuevaCitaScreen = ({ navigation }) => {
                                             ))}
                                         </select>
                                     ) : (
-                                        <TouchableOpacity style={styles.inputPicker}>
+                                        <TouchableOpacity style={styles.inputPicker} onPress={() => setShowHoraPicker(true)}>
                                             <Text style={hora ? styles.inputText : styles.placeholderText}>
                                                 {hora ? horasDisponibles.find(h => h.value === hora)?.label || hora : "Seleccionar hora..."}
                                             </Text>
+                                            <Text style={styles.pickerArrow}>v</Text>
                                         </TouchableOpacity>
                                     )}
                                     <Text style={styles.horaNota}>Sabado: solo disponible de 7:00 AM a 12:30 PM</Text>
@@ -335,10 +338,11 @@ const NuevaCitaScreen = ({ navigation }) => {
                                         ))}
                                     </select>
                                 ) : (
-                                    <TouchableOpacity style={styles.inputPicker}>
+                                    <TouchableOpacity style={styles.inputPicker} onPress={() => setShowHoraPicker(true)}>
                                         <Text style={hora ? styles.inputText : styles.placeholderText}>
                                             {hora ? horasDisponibles.find(h => h.value === hora)?.label || hora : "Seleccionar hora..."}
                                         </Text>
+                                        <Text style={styles.pickerArrow}>v</Text>
                                     </TouchableOpacity>
                                 )}
                                 <Text style={styles.horaNota}>Disponible de 7:00 AM a 5:00 PM (cerramos 1:00 PM - 2:00 PM por almuerzo)</Text>
@@ -369,6 +373,49 @@ const NuevaCitaScreen = ({ navigation }) => {
             >
                 <Text style={styles.botonTexto}>{loading ? "Cargando..." : "Confirmar Reservacion"}</Text>
             </TouchableOpacity>
+
+            {Platform.OS !== 'web' && (
+                <Modal
+                    visible={showHoraPicker}
+                    transparent={true}
+                    animationType="slide"
+                    onRequestClose={() => setShowHoraPicker(false)}
+                >
+                    <TouchableOpacity
+                        style={styles.modalOverlay}
+                        activeOpacity={1}
+                        onPress={() => setShowHoraPicker(false)}
+                    >
+                        <View style={styles.modalContent}>
+                            <View style={styles.modalHeader}>
+                                <Text style={styles.modalTitulo}>Seleccionar Hora</Text>
+                                <TouchableOpacity onPress={() => setShowHoraPicker(false)}>
+                                    <Text style={styles.modalCerrar}>X</Text>
+                                </TouchableOpacity>
+                            </View>
+                            <FlatList
+                                data={horasDisponibles}
+                                keyExtractor={(item) => item.value}
+                                renderItem={({ item }) => (
+                                    <TouchableOpacity
+                                        style={[styles.horaItem, hora === item.value && styles.horaItemSelected]}
+                                        onPress={() => {
+                                            setHora(item.value);
+                                            setShowHoraPicker(false);
+                                        }}
+                                    >
+                                        <Text style={[styles.horaItemText, hora === item.value && styles.horaItemTextSelected]}>
+                                            {item.label}
+                                        </Text>
+                                        {hora === item.value && <Text style={styles.horaCheck}>OK</Text>}
+                                    </TouchableOpacity>
+                                )}
+                                style={styles.horaList}
+                            />
+                        </View>
+                    </TouchableOpacity>
+                </Modal>
+            )}
             </View>
         </ScrollView>
     );
@@ -442,6 +489,18 @@ const styles = StyleSheet.create({
     boton: { backgroundColor: '#2563EB', borderRadius: 16, paddingVertical: 18, alignItems: 'center', marginTop: 10, marginBottom: 40 },
     botonDisabled: { backgroundColor: '#94A3B8' },
     botonTexto: { color: '#fff', fontWeight: '800', fontSize: 16 },
+    pickerArrow: { fontSize: 14, color: '#64748B', fontWeight: 'bold' },
+    modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+    modalContent: { backgroundColor: '#fff', borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '60%', paddingBottom: 30 },
+    modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, borderBottomWidth: 1, borderBottomColor: '#F1F5F9' },
+    modalTitulo: { fontSize: 18, fontWeight: '800', color: '#1E3A5F' },
+    modalCerrar: { fontSize: 18, fontWeight: 'bold', color: '#64748B', padding: 5 },
+    horaList: { paddingHorizontal: 16 },
+    horaItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 14, paddingHorizontal: 16, borderRadius: 12, marginVertical: 2 },
+    horaItemSelected: { backgroundColor: '#EFF6FF' },
+    horaItemText: { fontSize: 16, color: '#1E293B', fontWeight: '500' },
+    horaItemTextSelected: { color: '#2563EB', fontWeight: '700' },
+    horaCheck: { color: '#2563EB', fontWeight: '800', fontSize: 14 },
 });
 
 export default NuevaCitaScreen;
